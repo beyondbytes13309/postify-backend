@@ -1,6 +1,10 @@
 const LocalStrategy = require('passport-local')
+const GoogleStrategy = require('passport-google-oauth20')
 const { User } = require('../models/User')
 const bcrypt = require('bcrypt')
+
+
+require('dotenv').config()
 
 function initialize(passport) {
     passport.use(new LocalStrategy({
@@ -18,6 +22,28 @@ function initialize(passport) {
             return done(null, user)
         } catch(err) {
             return done(err, false)
+        }
+    }))
+
+    passport.use(new GoogleStrategy({
+        clientID: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
+        callbackURL: process.env.GOOGLE_REDIRECT_URL
+    }, async (accessToken, regreshToken, profile, done) => {
+        try {
+            let user = await User.findOne( {googleID: profile.id} )
+            if (!user) {
+                user = await new User({
+                    googleID: profile.id,
+                    username: profile.displayName,
+                    email: profile.emails[0].value
+                })
+                await user.save()
+            }
+
+            done(null, user)
+        } catch(err) {
+            done(err, false)
         }
     }))
 

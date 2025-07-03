@@ -18,13 +18,17 @@ const PORT = process.env.PORT || 3000
 app.use(express.json())
 app.use(express.urlencoded( { extended: true } ))
 app.use(cors({
-    origin: '*'
+    origin: process.env.FRONTEND_URL,
+    credentials: true
 }))
 
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24 // ⏰ 1 day (in milliseconds)
+  }
 }));
 
 app.use(passport.initialize())
@@ -40,7 +44,11 @@ const mainFunction = async () => {
 }
 
 app.get('/', (req, res) => {
-    return res.send("Good to go!")
+    if (!req.isAuthenticated()) return res.status(401).json({ message: 'Not logged in' });
+
+  res.json({
+    user: req.user
+  });
 })
 
 mainFunction()

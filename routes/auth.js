@@ -23,8 +23,14 @@ module.exports = function(User) {
 
     // Google Auth callback
     Router.get('/google/callback', passport.authenticate('google', {
-        successRedirect: process.env.GOOGLE_SUCCESS_REDIRECT,
-        failureRedirect: process.env.GOOGLE_FAILURE_REDIRECT
+        successRedirect: process.env.SUCCESS_REDIRECT,
+        failureRedirect: process.env.FAILURE_REDIRECT
     }));
+
+    Router.get('/github', passport.authenticate('github', { scope: [ 'user:email' ] }));
+    Router.get('/github/callback', passport.authenticate('github', {
+        successRedirect: process.env.SUCCESS_REDIRECT,
+        failureRedirect: process.env.FAILURE_REDIRECT
+    }))
     return Router
 }

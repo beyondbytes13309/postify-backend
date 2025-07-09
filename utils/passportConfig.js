@@ -43,7 +43,6 @@ function initialize(passport) {
                 user = await User.findOne({ email })
                 if (user) {
                     user.googleID = profile.id
-                    user.username = profile.displayName
                 } else {
                     user = new User({
                         googleID: profile.id,
@@ -91,7 +90,6 @@ function initialize(passport) {
                     })
                 } else {
                     user.githubID = profile.id
-                    user.username = profile.username
                 }
 
                 

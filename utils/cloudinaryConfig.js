@@ -21,7 +21,7 @@ const setupCloudinary = () => {
 
     const uploads = multer({ storage })
 
-    return uploads
+    return { uploads, cloudinary }
 }
 
 module.exports = { setupCloudinary }

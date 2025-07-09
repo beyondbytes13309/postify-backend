@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true},
     bio: { type: String, default: "", maxlength: 160},
     profilePicURL: { type: String, default: defaultPfps[Math.floor(Math.random()*4)] },
+    hasDefaultPfp: { type: Boolean, default: true },
     googleID: {type: String},
     githubID: {type: String},
     role: {type: String, enum: ['user', 'jrmod', 'srmod', 'admin', 'owner', 'banned', 'restricted'], default: 'user'}

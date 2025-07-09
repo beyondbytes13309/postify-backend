@@ -15,7 +15,7 @@ const user = require('./routes/user.js')
 
 const { checkAuth, authorize } = require('./middleware/authVerification.js')
 
-const initialize = require('./utils/localPassportConfig')
+const initialize = require('./utils/passportConfig.js')
 const { setupCloudinary } = require('./utils/cloudinaryConfig.js')
 
 const app = express()
@@ -43,13 +43,13 @@ initialize(passport)
 app.use(checkAuth)
 app.use(authorize)
 
-const uploads = setupCloudinary()
+const { uploads, cloudinary } = setupCloudinary()
 
 const mainFunction = async () => {
 
     await connectToDB(process.env.MONGODB_CONNECTION_STRING)
     app.use('/auth', auth(User))
-    app.use('/user', checkAuth, user(User, uploads))
+    app.use('/user', checkAuth, user(User, uploads, cloudinary))
 
 }
 

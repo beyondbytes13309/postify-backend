@@ -6,11 +6,17 @@ require('dotenv').config()
 const session = require('express-session')
 const passport = require('passport')
 
+
+
 const { User } = require('./models/User');
 const { connectToDB } = require('./utils/connectServices.js');
 const auth = require('./routes/auth.js');
+const user = require('./routes/user.js')
+
+const { checkAuth, authorize } = require('./middleware/authVerification.js')
 
 const initialize = require('./utils/localPassportConfig')
+const { setupCloudinary } = require('./utils/cloudinaryConfig.js')
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -33,22 +39,26 @@ app.use(session({
 
 app.use(passport.initialize())
 app.use(passport.session())
-
 initialize(passport)
+app.use(checkAuth)
+app.use(authorize)
+
+const uploads = setupCloudinary()
 
 const mainFunction = async () => {
 
     await connectToDB(process.env.MONGODB_CONNECTION_STRING)
     app.use('/auth', auth(User))
+    app.use('/user', checkAuth, user(User, uploads))
 
 }
 
 app.get('/', (req, res) => {
-    if (!req.isAuthenticated()) return res.status(401).json({ message: 'Not logged in' });
 
-  res.json({
-    user: req.user
-  });
+    res.json({
+      
+      user: req.user
+    });
 })
 
 mainFunction()

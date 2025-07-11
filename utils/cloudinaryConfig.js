@@ -15,11 +15,16 @@ const setupCloudinary = () => {
         cloudinary: cloudinary,
         params: {
             folder: 'uploads/',
-            allowed_formats: ['jpg', 'jpeg', 'png', 'webp']
+            allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'svg', 'gif']
         }
     })
 
-    const uploads = multer({ storage })
+    const uploads = multer({ 
+        storage: storage,
+        limits: {
+            fileSize: 1 * 1024 * 1024, // 1 MB (adjust as needed)
+        }
+    })
 
     return { uploads, cloudinary }
 }

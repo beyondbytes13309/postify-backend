@@ -62,7 +62,7 @@ function initialize(passport) {
 
     passport.use(new GitHubStrategy({
         clientID: process.env.GITHUB_CLIENT_ID,
-        clientSecret: process.env.GIHUB_CLIENT_SECRET,
+        clientSecret: process.env.GITHUB_CLIENT_SECRET,
         callbackURL: process.env.GITHUB_REDIRECT_URL
     }, async (accessToken, refreshToken, profile, done) => {
         try {
@@ -75,7 +75,7 @@ function initialize(passport) {
                     email = await (await fetch('https://api.github.com/user/emails', {
                         headers: {
                             'Authorization': `token ${accessToken}`, // GitHub checks this token
-                            'User-Agent': 'YourAppName'
+                            'User-Agent': 'PostifyApp'
                         }
                     })).json();
                 }

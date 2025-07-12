@@ -37,9 +37,10 @@ app.use(session({
   }
 }));
 
+
 app.use(passport.initialize())
-app.use(passport.session())
 initialize(passport)
+app.use(passport.session())
 app.use(checkAuth)
 app.use(authorize)
 

@@ -9,7 +9,7 @@ const defaultPfps = [
 ]
 
 const userSchema = new mongoose.Schema({
-    username: { type: String, unique: true, trim: true, minlength: 6, maxlength: 32, default: `User ${Math.floor(Math.random()*10000000)}`},
+    username: { type: String, unique: true, trim: true, minlength: 6, maxlength: 32, default: `User${Math.floor(Math.random()*10000000)}`},
     password: { type: String, minlength: 8, maxlength: 128},
     email: { type: String, required: true, unique: true},
     bio: { type: String, default: "", maxlength: 160},

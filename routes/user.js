@@ -17,9 +17,7 @@ module.exports = function(User, uploads, cloudinary) {
           return res.json({ code: "030", data: err.message});
         }
 
-        console.log("hitting the endpoint");
         if (!req.file) {
-          console.log("file is not defined");
           return res.status(400).json({ code: '031', data: "No image file uploaded" });
         }
         const user = await User.findOne({ _id: req.user._id });
@@ -53,7 +51,6 @@ module.exports = function(User, uploads, cloudinary) {
             await user.save()
         } catch(e) {
             if (e.name == 'ValidationError') {
-                //return res.status(400).json({code: '019', data: e.message})
                 if (e.errors?.bio?.kind === 'maxlength') {
                     return res.status(400).json({code: '021', data: 'Bio is longer than maximum allowed length'})
                 } else if (e.errors?.username?.kind === 'maxlength') {

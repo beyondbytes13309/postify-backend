@@ -15,7 +15,7 @@ const setupCloudinary = () => {
         cloudinary: cloudinary,
         params: {
             folder: 'uploads/',
-            allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'svg', 'gif']
+            allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'svg', 'gif', 'bmp']
         }
     })
 

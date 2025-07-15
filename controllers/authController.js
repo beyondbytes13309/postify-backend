@@ -2,9 +2,6 @@ const passport = require('passport')
 
 const registerUser = async (User, req, res) => {
     const { email, password } = req.body;
-    console.log("hitting the endpoint")
-
-
     const user = await User.findOne({ email })
 
     if (user) { 
@@ -32,6 +29,15 @@ const loginUser = (req, res, next) => {
     })(req, res, next)
 }
 
+const logoutUser = (req, res) => {
+    req.logout(() => {
+        req.session.destroy((err) => {
+            if (err) return res.status(500).json({ code: '010', data: 'Failed to logout' })
+            res.clearCookie('connect.sid')
+            res.status(200).json({ code: '011', data: 'Logged out successfully'})
+        })
+    })
+}
 
 
-module.exports = { registerUser, loginUser }
+module.exports = { registerUser, loginUser, logoutUser }

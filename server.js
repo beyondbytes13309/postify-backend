@@ -55,9 +55,8 @@ const mainFunction = async () => {
 }
 
 app.get('/', (req, res) => {
-
     res.json({
-      
+      code: '055',
       user: req.user
     });
 })

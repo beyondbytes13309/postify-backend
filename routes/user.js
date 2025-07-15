@@ -37,7 +37,7 @@ module.exports = function(User, uploads, cloudinary) {
     });
 
     Router.post('/editUser', async (req, res) => {
-        const { username, bio } = req.body
+        const { username, bio, displayName } = req.body
         const user = await User.findOne({ _id: req.user._id })
 
         try {
@@ -46,6 +46,10 @@ module.exports = function(User, uploads, cloudinary) {
             }
             if (bio && user.bio != bio) {
                 user.bio = bio
+            }
+
+            if (displayName && user.displayName != displayName) {
+              user.displayName = displayName
             }
 
             await user.save()
@@ -57,6 +61,10 @@ module.exports = function(User, uploads, cloudinary) {
                     return res.status(400).json({code: '021', data: 'Username is longer than the maximum allowed length'})
                 } else if (e.errors?.username?.kind === 'minlength') {
                     return res.status(400).json({code: '021', data: 'Username is shorter than the minimum allowed length'})
+                } else if (e.errors?.displayName?.kind === 'minlength') {
+                    return res.status(400).json({code: '021', data: 'Display name is shorter than the minimum allowed length'})
+                } else if (e.errors?.displayName?.kind === 'maxlength') {
+                  return res.status(400).json({code: '021', data: 'Display name is longer than the minimum allowed length'})
                 }
             } else if (e.name == 'MongoServerError') {
                 if (e.code == 11000) {

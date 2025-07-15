@@ -8,16 +8,21 @@ const defaultPfps = [
     'https://res.cloudinary.com/drwa5qpv4/image/upload/v1751643969/4_tymbn4.png', 
 ]
 
+const defaultUsernameAndDisplayName = `User${Math.floor(Math.random()*10000000)}`
+
 const userSchema = new mongoose.Schema({
-    username: { type: String, unique: true, trim: true, minlength: 6, maxlength: 32, default: `User${Math.floor(Math.random()*10000000)}`},
+    username: { type: String, unique: true, trim: true, minlength: 6, maxlength: 32, default: defaultUsernameAndDisplayName},
     password: { type: String, minlength: 8, maxlength: 128},
+    displayName: { type: String, minlength: 3, maxlength: 32, default: defaultUsernameAndDisplayName},
     email: { type: String, required: true, unique: true},
     bio: { type: String, default: "", maxlength: 160},
     profilePicURL: { type: String, default: defaultPfps[Math.floor(Math.random()*4)] },
     hasDefaultPfp: { type: Boolean, default: true },
     googleID: {type: String},
     githubID: {type: String},
-    role: {type: String, enum: ['user', 'jrmod', 'srmod', 'admin', 'owner', 'banned', 'restricted'], default: 'user'}
+    role: {type: String, enum: ['user', 'jrmod', 'srmod', 'admin', 'owner', 'banned', 'restricted'], default: 'user'},
+    numOfPosts: { type: Number, default: 0 },
+    numOfMembers: { type: Number, default: 0 }
 }, {
     timestamps: true
 })

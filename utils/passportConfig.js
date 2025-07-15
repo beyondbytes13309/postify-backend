@@ -46,8 +46,9 @@ function initialize(passport) {
                 } else {
                     user = new User({
                         googleID: profile.id,
-                        username: profile.displayName,
-                        email: profile.emails[0].value
+                        username: email.split('@')[0].replace(/[^\w]/g, ''),
+                        displayName: profile.displatName,
+                        email: email
                     })
                 }
                 
@@ -80,13 +81,13 @@ function initialize(passport) {
                     })).json();
                 }
 
-                const user = await User.findOne({ email: email[0].email })
+                user = await User.findOne({ email: email[0].email })
 
                 if (!user) {
                     user = await new User({
                         githubID: profile.id,
                         username: profile.username,
-                        email: email[0].email
+                        email: email[0].email,
                     })
                 } else {
                     user.githubID = profile.id

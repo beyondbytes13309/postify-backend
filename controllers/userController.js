@@ -32,18 +32,18 @@ const uploadPfp = (User, uploads, cloudinary, req, res) => {
 
 const editUser = async (User, req, res) => {
   const { username, bio, displayName } = req.body;
-  const user = await User.findOne({ _id: req.user._id });
+  const user = await User.findById(req.user._id);
 
   try {
     if (username && user.username != username) {
-      user.username = username;
+      user.username = username.trim();
     }
     if (bio && user.bio != bio) {
-      user.bio = bio;
+      user.bio = bio.trim();
     }
 
     if (displayName && user.displayName != displayName) {
-      user.displayName = displayName;
+      user.displayName = displayName.trim();
     }
 
     await user.save();
@@ -84,7 +84,10 @@ const editUser = async (User, req, res) => {
             code: "021",
             data: "Display name is longer than the minimum allowed length",
           });
-      }
+      } 
+      
+      return res.status(400).json({ code: '021', data: 'Incorrect data'})
+
     } else if (e.name == "MongoServerError") {
       if (e.code == 11000) {
         return res
@@ -92,6 +95,8 @@ const editUser = async (User, req, res) => {
           .json({ code: "021", data: "Username is taken!" });
       }
     }
+
+    return res.status(500).json({ code: '550', data: "Unexpected error occured!" })
   }
 
   return res.status(201).json({ code: "020" });

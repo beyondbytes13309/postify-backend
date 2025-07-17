@@ -11,10 +11,38 @@ const defaultPfps = [
 const defaultUsernameAndDisplayName = `User${Math.floor(Math.random()*10000000)}`
 
 const userSchema = new mongoose.Schema({
-    username: { type: String, unique: true, trim: true, minlength: 6, maxlength: 32, default: defaultUsernameAndDisplayName},
-    password: { type: String, minlength: 8, maxlength: 128},
-    displayName: { type: String, minlength: 3, maxlength: 32, default: defaultUsernameAndDisplayName},
-    email: { type: String, required: true, unique: true},
+    username: { 
+        type: String, 
+        unique: true, 
+        trim: true, 
+        minlength: 6, 
+        maxlength: 32, 
+        default: defaultUsernameAndDisplayName,
+        match: [
+            /^[A-Za-z0-9!@#$%^&*()_+=\[\]{}|:;<>?.\/~-]+$/,
+            'Invalid characters in username'
+        ]},
+        
+    password: { 
+        type: String, 
+        minlength: 8, 
+        maxlength: 128,
+        match: [
+            /^[A-Za-z0-9!@#$%^&*()_+=\[\]{}|:;<>?.\/~-]+$/,
+            'Invalid characters in password'
+        ]},
+    displayName: { 
+        type: String, 
+        minlength: 3, 
+        maxlength: 32, 
+        default: defaultUsernameAndDisplayName},
+    email: { 
+        type: String, 
+        required: true, unique: true,
+        match: [
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+            'Invalid format format'
+        ]},
     bio: { type: String, default: "", maxlength: 160},
     profilePicURL: { type: String, default: defaultPfps[Math.floor(Math.random()*4)] },
     hasDefaultPfp: { type: Boolean, default: true },

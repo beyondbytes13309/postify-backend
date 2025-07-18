@@ -8,7 +8,7 @@ const getPublicIdFromUrl = (url) => {
 const uploadPfp = (User, uploads, cloudinary, req, res) => {
   uploads.single("image")(req, res, async function (err) {
     if (err) {
-      return res.json({ code: "030", data: err.message });
+      return res.status(400).json({ code: "030", data: err.message });
     }
 
     if (!req.file) {
@@ -26,7 +26,7 @@ const uploadPfp = (User, uploads, cloudinary, req, res) => {
 
     await user.save();
 
-    return res.json({ code: "032", data: "Saved profile picture" });
+    return res.status(200).json({ code: "032", data: "Saved profile picture" });
   });
 };
 
@@ -99,7 +99,7 @@ const editUser = async (User, req, res) => {
     return res.status(500).json({ code: '550', data: "Unexpected error occured!" })
   }
 
-  return res.status(201).json({ code: "020" });
+  return res.status(200).json({ code: "020" });
 };
 
 module.exports = { uploadPfp, editUser };

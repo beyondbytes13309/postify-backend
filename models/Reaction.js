@@ -15,6 +15,8 @@ const reactionSchema = new mongoose.Schema({
     }
 })
 
+reactionSchema.index({ authorID: 1, postID: 1 }, { unique: true });
+
 const Reaction = mongoose.model('Reaction', reactionSchema)
 
 module.exports = { Reaction }

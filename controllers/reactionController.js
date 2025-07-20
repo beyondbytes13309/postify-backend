@@ -2,25 +2,37 @@ const makeReaction = async (Reaction, Post, req, res) => {
     const postID = req.body.postID
     const reactionType = req.body.reactionType
 
+    const authorID = req?.user?._id
+
     if (!postID || !reactionType) {
         return res.status(400).json({ code: '010', data: 'Data required!' })
     }
 
-    const post = await Post.findOne({ postID })
+    const post = await Post.findOne({ _id: postID })
 
     if (!post) {
         return res.status(404).json({ code: '016', data: 'Post not found!' })
     }
 
-    const newReaction = new Reaction({
-        authorID: req?.user?._id,
-        reactionType: reactionType,
-        postID: postID
-    })
+
+    let reaction =  await Reaction.findOne({ authorID, postID})
+    let message;
+
+    if (reaction) {
+        reaction.reactionType = reactionType
+        message = "Modified reaction successfully"
+    } else {
+        reaction = new Reaction({
+            authorID: authorID,
+            reactionType: reactionType,
+            postID: postID
+        })
+        message = "Created reaction successfully"
+    }
 
     try {
-        await newReaction.save()
-        return res.status(201).json({ code: '017', data: 'Reaction created successfully'})
+        await reaction.save()
+        return res.status(201).json({ code: '017', data: message || 'Something is fishy...'})
     } catch(e) {
         if (e.name == 'ValidationError') {
             if (e.errors?.reactionType?.kind == 'max') {
@@ -47,9 +59,11 @@ const deleteReaction = async (Reaction, Post, req, res) => {
     if (!reactionID) {
         return res.status(400).json({ code: '010', data: 'Data required!' })
     }
+    
+    let reaction
 
     try {
-        const reaction = await Reaction.findOne({ _id: reactionID })
+        reaction = await Reaction.findOne({ _id: reactionID })
     } catch(e) {
         return res.status(500).json({ code: '550', data: "Unexpected error occured!" })
     }

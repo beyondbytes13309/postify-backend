@@ -10,10 +10,12 @@ const passport = require('passport')
 
 const { User } = require('./models/User');
 const { Post } = require('./models/Post')
+const { Reaction } = require('./models/Reaction')
 const { connectToDB } = require('./utils/connectServices.js');
 const auth = require('./routes/auth.js');
 const user = require('./routes/user.js')
 const post = require('./routes/post.js')
+const reaction = require('./routes/reaction.js')
 
 const { checkAuth, authorize } = require('./middleware/authVerification.js')
 
@@ -54,6 +56,7 @@ const mainFunction = async () => {
     app.use('/auth', auth(User))
     app.use('/user', checkAuth, user(User, uploads, cloudinary))
     app.use('/post', checkAuth, post(Post, User))
+    app.use('/reaction', checkAuth, reaction(Reaction, User))
 
 }
 

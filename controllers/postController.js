@@ -1,4 +1,4 @@
-const createPost = async (Post, User, req, res) => {
+const createPost = async (Post, Reaction, req, res) => {
     const { postText } = req.body
     if (!postText) {
         return res.status(400).json({ code: '010', data: 'Invalid data'})
@@ -39,14 +39,27 @@ const createPost = async (Post, User, req, res) => {
     }
 }
 
-const getPosts = async (Post, User, req, res) => {
+const getPosts = async (Post, Reaction, req, res) => {
     try {
         const posts = await Post.find()
         .sort({ createdAt: -1 })
         .limit(10)
         .populate('authorID', '_id displayName profilePicURL')
-        
-        return res.status(200).json({ code: '014', data: posts})
+
+        const postsWithReactions = await Promise.all(
+          posts.map(async (post) => {
+            const reactions = await Reaction.find({ postID: post._id }).select('reactionType authorID -_id')
+
+            const userReactionObj = reactions.find(r => r.authorID == req.user?._id)
+            const userReaction = userReactionObj ? userReactionObj.reactionType : null
+            return {
+              ...post.toObject(),
+              reactions,
+              userReaction
+            };
+          })
+        );
+        return res.status(200).json({ code: '014', data: postsWithReactions})
     } catch(e) {
         return res.status(500).json({code: '550', data: 'Unexpected error occured!'})
     }

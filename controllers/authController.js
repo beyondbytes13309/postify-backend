@@ -1,11 +1,16 @@
 const passport = require('passport')
+const sanitizeUser = require('../utils/security')
 
 const registerUser = async (User, req, res) => {
     const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.json({ code: '010', data: "Email or password not provided!" }) 
+    }
     const user = await User.findOne({ email })
 
     if (user) { 
-        return res.json({ code: '003' }) 
+        return res.json({ code: '003', data: sanitizeUser(user) }) 
     }
     
     const newUser = new User({
@@ -14,7 +19,11 @@ const registerUser = async (User, req, res) => {
 
     await newUser.save()
 
-    return res.json({ code: '004', data: null })
+    req.logIn(newUser, (err) => {
+        if (err) return next(err);
+        return res.json({ code: '004', data: sanitizeUser(newUser) });
+    });
+
 }
 
 const loginUser = (req, res, next) => {
@@ -24,7 +33,7 @@ const loginUser = (req, res, next) => {
 
         req.logIn(user, (err) => {
             if (err) return next(err)
-            return res.json({ code: '005', data: user})
+            return res.json({ code: '005', data: santitize(user)})
         })
     })(req, res, next)
 }

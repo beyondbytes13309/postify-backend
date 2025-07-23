@@ -8,7 +8,14 @@ const defaultPfps = [
     'https://res.cloudinary.com/drwa5qpv4/image/upload/v1751643969/4_tymbn4.png', 
 ]
 
-const defaultUsernameAndDisplayName = `User${Math.floor(Math.random()*10000000)}`
+
+const genDisplayName = () => `User${Math.floor(Math.random()*10000000)}`
+const genUsername = () => {
+    const adjectives = ['Cool', 'Fast', 'Smart', 'Silent'];
+    const animals = ['Tiger', 'Eagle', 'Panther', 'Wolf', 'Hawk'];
+    const number = Math.floor(1000 + Math.random() * 9000);
+    return `${adjectives[Math.floor(Math.random()*adjectives.length)]}${animals[Math.floor(Math.random()*animals.length)]}${Math.round(Math.random()*9000)}`
+}
 
 const userSchema = new mongoose.Schema({
     username: { 
@@ -17,7 +24,7 @@ const userSchema = new mongoose.Schema({
         trim: true, 
         minlength: 6, 
         maxlength: 32, 
-        default: defaultUsernameAndDisplayName,
+        default: genUsername,
         match: [
             /^[A-Za-z0-9!@#$%^&*()_+=\[\]{}|:;<>?.\/~-]+$/,
             'Invalid characters in username'
@@ -27,6 +34,7 @@ const userSchema = new mongoose.Schema({
         type: String, 
         minlength: 8, 
         maxlength: 128,
+        select: false,
         match: [
             /^[A-Za-z0-9!@#$%^&*()_+=\[\]{}|:;<>?.\/~-]+$/,
             'Invalid characters in password'
@@ -35,7 +43,7 @@ const userSchema = new mongoose.Schema({
         type: String, 
         minlength: 3, 
         maxlength: 32, 
-        default: defaultUsernameAndDisplayName},
+        default: genDisplayName},
     email: { 
         type: String, 
         required: true, unique: true,
@@ -44,7 +52,7 @@ const userSchema = new mongoose.Schema({
             'Invalid format format'
         ]},
     bio: { type: String, default: "", maxlength: 160},
-    profilePicURL: { type: String, default: defaultPfps[Math.floor(Math.random()*4)] },
+    profilePicURL: { type: String, default: () => defaultPfps[Math.floor(Math.random()*4)] },
     hasDefaultPfp: { type: Boolean, default: true },
     googleID: {type: String},
     githubID: {type: String},

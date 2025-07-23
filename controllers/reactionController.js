@@ -4,7 +4,8 @@ const makeReaction = async (Reaction, Post, req, res) => {
 
     const authorID = req?.user?._id
 
-    if (!postID || !reactionType) {
+
+    if (!postID || !typeof reactionType === 'number') {
         return res.status(400).json({ code: '010', data: 'Data required!' })
     }
 

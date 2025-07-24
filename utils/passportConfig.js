@@ -14,11 +14,20 @@ function initialize(passport) {
         passwordField: 'password'
     }, 
     async (username, password, done) => {
+        if (!username || !password) {
+            return done(null, false, {code: '010', data: 'Data is required!'})
+        }
         try {
             const user = await User.findOne({ username })
             if (!user) return done(null, false, {code: '001'})
+            
+            const userPassword = user.password
 
-            const isMatch = await bcrypt.compare(password, user.password)
+            if (!userPassword) {
+                return done(null, false, {code: '009', data: "User didn't register with local auth; no password field present."})
+            }
+
+            const isMatch = await bcrypt.compare(password, userPassword)
             if (!isMatch) return done(null, false, {code: '002'})
 
             return done(null, user)

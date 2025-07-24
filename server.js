@@ -22,7 +22,7 @@ const { checkAuth, authorize } = require('./middleware/authVerification.js')
 const initialize = require('./utils/passportConfig.js')
 const { setupCloudinary } = require('./utils/cloudinaryConfig.js')
 
-const sanitizeUser = require('./utils/security.js')
+const { sanitizeUser } = require('./utils/security.js')
 
 const app = express()
 const PORT = process.env.PORT || 3000

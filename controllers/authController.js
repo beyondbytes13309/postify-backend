@@ -1,5 +1,5 @@
 const passport = require('passport')
-const sanitizeUser = require('../utils/security')
+const { sanitizeUser } = require('../utils/security')
 
 const registerUser = async (User, req, res) => {
     const { email, password } = req.body;
@@ -17,12 +17,29 @@ const registerUser = async (User, req, res) => {
         email, password
     })
 
-    await newUser.save()
+    try {
+        await newUser.save()
 
-    req.logIn(newUser, (err) => {
-        if (err) return next(err);
-        return res.json({ code: '004', data: sanitizeUser(newUser) });
-    });
+        req.logIn(newUser, (err) => {
+            if (err) return next(err);
+            return res.json({ code: '004', data: sanitizeUser(newUser) });
+        });
+    } catch(e) {
+        if (e.name == 'validationError') {
+            if (e.errors?.email?.properties?.type == 'regexp') {
+                return res.status(400).json({ code: '024', data: 'Incorrect email pattern' })
+            } else if (e.errors?.password?.kind == 'maxlength') {
+                return res.status(400).json({ code: '024', data: 'Length of password is too long' })
+            } else if (e.errors?.password?.kind == 'minlength') {
+                return res.status(400).json({ code: '024', data: 'Length of password is too short' })
+            }
+
+            return res.status(400).json({ code: '024', data: 'Incorrect data'})
+        }
+    }
+    
+
+    
 
 }
 

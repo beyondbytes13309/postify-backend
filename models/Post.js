@@ -9,14 +9,6 @@ const postSchema = new mongoose.Schema({
         type: String,
         minlength: 10,
         maxlength: 300
-    },
-    reactionCount: {
-        type: Number,
-        default: 0
-    },
-    commentCount: {
-        type: Number,
-        default: 0
     }
 })
 

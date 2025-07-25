@@ -38,9 +38,10 @@ const editUser = async (User, req, res) => {
     if (username && user.username != username) {
       user.username = username.trim();
     }
-    if (bio && user.bio != bio) {
+    if (bio !== null && bio !== undefined && user.bio !== bio) {
       user.bio = bio.trim();
     }
+
 
     if (displayName && user.displayName != displayName) {
       user.displayName = displayName.trim();

@@ -8,7 +8,8 @@ const commentSchema = new mongoose.Schema({
     commentText: {
         type: String,
         minlength: 5, 
-        maxlength: 100,
+        maxlength: 150,
+        required: true
     },
     postID: {
         type: String,

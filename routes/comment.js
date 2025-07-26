@@ -5,6 +5,7 @@ const { createComment, deleteComment, getComments } = require('../controllers/co
 module.exports = (Comment, Post) => {
     const Router = express.Router()
 
-    Router.post('/createComment', (req, res) => createComment(Comment, req, res))
+    Router.post('/createComment', (req, res) => createComment(Comment, req, res));
+    Router.get('/getComments', (req, res) => getComments(Comment, req, res))
     return Router
 }

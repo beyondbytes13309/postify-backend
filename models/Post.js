@@ -10,6 +10,8 @@ const postSchema = new mongoose.Schema({
         minlength: 10,
         maxlength: 300
     }
+}, {
+    timestamps: true
 })
 
 const Post = mongoose.model('Post', postSchema)

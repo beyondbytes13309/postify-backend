@@ -1,3 +1,5 @@
+const mongoose = require('mongoose')
+
 const createPost = async (Post, Reaction, req, res) => {
     const { postText } = req.body
     if (!postText) {
@@ -70,4 +72,36 @@ const getPosts = async (Post, Reaction, Comment, req, res) => {
     
 }
 
-module.exports = { createPost, getPosts }
+const deletePost = async (Post, Reaction, Comment, req, res) => {
+
+    try {
+
+    
+    const postID = req.params.postID
+
+    if (!mongoose.Types.ObjectId.isValid(postID)) {
+        return res.status(400).json({ code: '010', data: 'Invalid data!' })
+    }
+
+    const result = await Post.deleteOne({ _id: postID })
+
+    if (result?.deletedCount > 0) {
+
+        await Promise.all([
+            Comment.deleteMany({ postID }),
+            Reaction.deleteMany({ postID })
+        ])
+
+        return res.status(200).json({ code: '012', data: 'Deleted post successfully!' })
+    } else {
+        return res.status(200).json({ code: '016', data: 'Post not found' })
+    }
+
+    } catch(e) {
+        console.log(e)
+        return res.status(500).json({code: '550', data: 'Unexpected error occured!'})
+    }
+    
+}
+
+module.exports = { createPost, getPosts, deletePost }

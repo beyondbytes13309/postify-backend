@@ -51,7 +51,7 @@ app.use(passport.initialize())
 initialize(passport)
 app.use(passport.session())
 app.use(checkAuth)
-app.use(authorize)
+
 
 const { uploads, cloudinary } = setupCloudinary()
 

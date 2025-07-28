@@ -32,10 +32,6 @@ const createComment = async (Comment, req, res) => {
     }
 }
 
-const deleteComment = (Comment, req, res) => {
-
-}
-
 const getComments = async (Comment, req, res) => {
     const postID = req.query.postID
     const page = parseInt(req.query.page) || 1
@@ -57,12 +53,32 @@ const getComments = async (Comment, req, res) => {
             .populate('authorID', 'displayName profilePicURL')
             .lean();
 
-        return res.status(200).json({ code: '033', data: comments });
+        return res.status(200).json({ code: '032', data: comments });
     } catch (e) {
         return res.status(500).json({code: '550', data: 'Unexpected error occured!'})
     }
 
+}
 
+const deleteComment = async (Comment, req, res) => {
+    const commentID = req.params.commentID
+
+    if (!mongoose.Types.ObjectId.isValid(commentID)) {
+        return res.status(400).json({ code: '010', data: 'Data required!' })
+    }
+
+    try {
+        const result = await Comment.deleteOne({ _id: commentID })
+
+        if (result.deletedCount > 0) {
+            return res.status(200).json({ code: '033', data: "Comment deleted successfully!" });
+        } else {
+            return res.status(404).json({ code: '034', data: "Comment not found" });
+        }
+        
+    } catch(err) {
+        return res.status(500).json({code: '550', data: 'Unexpected error occured!'})
+    }
 }
 
 module.exports = { createComment, deleteComment, getComments }

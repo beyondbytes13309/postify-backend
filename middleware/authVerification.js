@@ -6,8 +6,20 @@ const checkAuth = (req, res, next) => {
 }
 
 const permissions = {
-    user: ['create_post', 'edit_own_profile', 'edit_own_post', 'delete_own_post', 'delete_own_reaction'],
-    admin: ['create_post', 'edit_any_profile', 'ban_any_user', 'delete_any_post', 'delete_own_reaction'],
+    user: [
+        'create_post', 
+        'edit_own_profile', 
+        'edit_own_post', 
+        'delete_own_post', 
+        'delete_own_reaction',
+        'delete_own_comment'],
+    admin: [
+        'create_post', 
+        'edit_any_profile', 
+        'ban_any_user', 
+        'delete_any_post', 
+        'delete_own_reaction',
+        'delete_any_comment'],
     banned: []
 };
 

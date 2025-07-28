@@ -1,3 +1,5 @@
+const mongoose = require('mongoose')
+
 const makeReaction = async (Reaction, Post, req, res) => {
     const postID = req.body.postID
     const reactionType = req.body.reactionType
@@ -55,9 +57,9 @@ const makeReaction = async (Reaction, Post, req, res) => {
 }
 
 const deleteReaction = async (Reaction, Post, req, res) => {
-    const reactionID = req.body.reactionID
+    const reactionID = req.params.reactionID
 
-    if (!reactionID) {
+    if (!mongoose.Types.ObjectId.isValid(reactionID)) {
         return res.status(400).json({ code: '010', data: 'Data required!' })
     }
     
@@ -72,10 +74,6 @@ const deleteReaction = async (Reaction, Post, req, res) => {
 
     if (!reaction) {
         return res.status(404).json({ code: '018', data: 'Reaction not found!' })
-    }
-
-    if (reaction.authorID != req.user._id) {
-        return res.status(403).json({ code: '007', data: 'You are not allowed to perform this action.' })
     }
 
     await Reaction.deleteOne({ _id: reactionID })

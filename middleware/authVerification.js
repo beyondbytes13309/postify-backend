@@ -6,8 +6,8 @@ const checkAuth = (req, res, next) => {
 }
 
 const permissions = {
-    user: ['create_post', 'edit_own_profile', 'edit_own_post', 'delete_own_post'],
-    admin: ['create_post', 'edit_any_profile', 'ban_any_user', 'delete_any_post'],
+    user: ['create_post', 'edit_own_profile', 'edit_own_post', 'delete_own_post', 'delete_own_reaction'],
+    admin: ['create_post', 'edit_any_profile', 'ban_any_user', 'delete_any_post', 'delete_own_reaction'],
     banned: []
 };
 
@@ -38,6 +38,7 @@ const authorize = (actions, resourceFetcher = null) => {
             }
 
             const isAllowed = actions.some(action => can(action, user, resource));
+
 
             if (isAllowed) {
                 return next();

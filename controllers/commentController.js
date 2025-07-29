@@ -17,7 +17,10 @@ const createComment = async (Comment, req, res) => {
 
     try {
         await comment.save()
-        return res.status(201).json({ code: '031', data: 'Comment created successfully'})
+        await comment.populate('authorID', 'displayName profilePicURL')
+        const finalObjToSend = comment.toObject();
+
+        return res.status(201).json({ code: '031', data: {message: 'Comment created successfully', comment: finalObjToSend}})
     } catch(e) {
         if (e.name == 'ValidationError') {
             if (e.errors?.commentText?.kind == 'maxlength') {

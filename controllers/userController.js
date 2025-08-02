@@ -1,3 +1,5 @@
+const { sanitizeUser } = require('../utils/security.js')
+
 const getPublicIdFromUrl = (url) => {
   const parts = url.split('/');
   const versionIndex = parts.findIndex(p => /^v\d+$/i.test(p));
@@ -103,4 +105,11 @@ const editUser = async (User, req, res) => {
   return res.status(200).json({ code: "020" });
 };
 
-module.exports = { uploadPfp, editUser };
+const getUserData = (req, res) => {
+   return res.json({
+      code: '055',
+      user: sanitizeUser(req.user)
+    });
+}
+
+module.exports = { uploadPfp, editUser, getUserData };

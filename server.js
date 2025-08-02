@@ -25,7 +25,7 @@ const { checkAuth, authorize } = require('./middleware/authVerification.js')
 const initialize = require('./utils/passportConfig.js')
 const { setupCloudinary } = require('./utils/cloudinaryConfig.js')
 
-const { sanitizeUser } = require('./utils/security.js')
+
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -67,10 +67,10 @@ const mainFunction = async () => {
 }
 
 app.get('/', (req, res) => {
-    res.json({
-      code: '055',
-      user: sanitizeUser(req.user)
-    });
+    return res.json({
+      code: '13309',
+      data: 'Hmm, what are you up to 👋'
+    })
 })
 
 mainFunction()

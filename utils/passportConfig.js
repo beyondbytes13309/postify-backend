@@ -18,7 +18,7 @@ function initialize(passport) {
             return done(null, false, {code: '010', data: 'Data is required!'})
         }
         try {
-            const user = await User.findOne({ username })
+            const user = await User.findOne({ username }).populate('password')
             if (!user) return done(null, false, {code: '001'})
             
             const userPassword = user.password

@@ -50,7 +50,7 @@ const loginUser = (req, res, next) => {
 
         req.logIn(user, (err) => {
             if (err) return next(err)
-            return res.json({ code: '005', data: santitize(user)})
+            return res.json({ code: '005', data: sanitizeUser(user)})
         })
     })(req, res, next)
 }

@@ -37,22 +37,24 @@ const createComment = async (Comment, req, res) => {
 
 const getComments = async (Comment, req, res) => {
     const postID = req.query.postID
+    const maxNumOfComments = 10
     const page = parseInt(req.query.page) || 1
-    const limit = req.query.limit ? parseInt(req.query.limit) : 0
-    const skip = (page - 1) * limit;
+    const skip = (page - 1) * maxNumOfComments;
+    const sortMethod = req.query.sort || 'latest'
     
     if (!mongoose.Types.ObjectId.isValid(postID)) {
         return res.status(400).json({ code: '010', data: 'Data required!' })
     }
 
     try {
-        let query = Comment.find({ postID }).sort({ createdAt: -1 });
+        let query = Comment.find({ postID }).sort({ createdAt: sortMethod === 'latest' ? -1 : 1 });
 
-        if (limit > 0) {
-            query = query.skip(skip).limit(limit);
+        if (maxNumOfComments > 0) {
+            query = query.skip(skip).limit(maxNumOfComments);
         }
 
         const comments = await query
+            .select('-__v -updatedAt')
             .populate('authorID', 'displayName profilePicURL')
             .lean();
 

@@ -42,12 +42,20 @@ const createPost = async (Post, Reaction, req, res) => {
 }
 
 const getPosts = async (Post, Reaction, Comment, req, res) => {
-    try {
-        const posts = await Post.find()
-        .sort({ createdAt: -1 })
-        .limit(10)
-        .populate('authorID', '_id displayName profilePicURL')
+    const maxNumOfPosts = 10
+    const page = parseInt(req?.query?.page) || 1
+    const skip = (page - 1) * maxNumOfPosts;
 
+    try {
+        let query = Post.find()
+
+        if (maxNumOfPosts > 0) {
+            query = query.skip(skip).limit(maxNumOfPosts);
+        }
+
+        const posts = await query
+            .sort({ createdAt: -1 })
+            .populate('authorID', '_id displayName profilePicURL')
         
 
         const postsWithReactions = await Promise.all(
@@ -70,6 +78,48 @@ const getPosts = async (Post, Reaction, Comment, req, res) => {
         return res.status(500).json({code: '550', data: 'Unexpected error occured!'})
     }
     
+}
+
+const getUserPosts = async (Post, Reaction, Comment, req, res) => {
+    const userID = req?.params?.userID
+    const maxNumOfPosts = 10
+    const page = parseInt(req?.query?.page) || 1
+    const skip = (page - 1) * maxNumOfPosts;
+
+    if (!mongoose.Types.ObjectId.isValid(userID)) {
+        return res.status(400).json({ code: '010', data: 'Invalid userID!' })
+    }
+
+    try {
+        let query = Post.find({ authorID: userID })
+
+        if (maxNumOfPosts > 0) {
+            query = query.skip(skip).limit(maxNumOfPosts);
+        }
+
+        const posts = await query
+            .sort({ createdAt: -1 })
+            .populate('authorID', '_id displayName profilePicURL')
+
+        const postsWithReactions = await Promise.all(
+            posts.map(async (post) => {
+            const reactions = await Reaction.find({ postID: post._id }).select('reactionType authorID _id')
+            const numOfComments = await Comment.countDocuments({ postID: post._id })
+            const userReactionObj = reactions.find(r => r.authorID == req.user?._id)
+            const userReaction = userReactionObj ? userReactionObj.reactionType : null
+            return {
+                ...post.toObject(),
+                reactions,
+                userReaction,
+                userReactionID: userReactionObj?._id,
+                numOfComments
+            };
+            })
+        );
+        return res.status(200).json({ code: '013', data: postsWithReactions})
+    } catch(e) {
+        return res.status(500).json({code: '550', data: 'Unexpected error occured!'})
+    }
 }
 
 const deletePost = async (Post, Reaction, Comment, req, res) => {
@@ -98,10 +148,9 @@ const deletePost = async (Post, Reaction, Comment, req, res) => {
     }
 
     } catch(e) {
-        console.log(e)
         return res.status(500).json({code: '550', data: 'Unexpected error occured!'})
     }
     
 }
 
-module.exports = { createPost, getPosts, deletePost }
+module.exports = { createPost, getPosts, getUserPosts, deletePost }

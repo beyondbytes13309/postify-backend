@@ -65,6 +65,44 @@ const getComments = async (Comment, req, res) => {
 
 }
 
+const editComment = async (Comment, req, res) => {
+    const commentID = req?.params?.commentID;
+    const commentText = req?.body?.commentText
+
+    if (!mongoose.Types.ObjectId.isValid(commentID) || !commentText) {
+        return res.status(400).json({ code: '010', data: 'Data required!' })
+    }
+
+    try {
+        const result = await Comment.findOneAndUpdate(
+            { _id: commentID }, 
+            { $set: { commentText }}, 
+            { new: true, runValidators: true }
+        )
+        .select('-__v -updatedAt')
+        .populate('authorID', 'displayName profilePicURL')
+        .lean();
+
+        if (!result) {
+            return res.status(404).json({ code: '034', data: 'Comment not found!' })
+        }
+        
+        return res.status(200).json({ code: '035', data: { message: 'Comment edited successfully!', comment: result} })
+
+    } catch(err) {
+        if (err.name == 'ValidationError') {
+            if (err.errors?.commentText?.kind == 'maxlength') {
+                return res.status(400).json({ code: '026', data: 'Comment is longer than maximum allowed length'})
+            } else if (err.errors?.commentText.kind == 'minlength') {
+                return res.status(400).json({ code: '026', data: 'Comment is shorter than minimum allowed length'})
+            } 
+            return res.status(400).json({ code: '026', data: 'Incorrect data'})
+        }
+
+        return res.status(500).json({ code: '550', data: "Unexpected error occured!" })
+    }
+}
+
 const deleteComment = async (Comment, req, res) => {
     const commentID = req.params.commentID
 
@@ -86,4 +124,4 @@ const deleteComment = async (Comment, req, res) => {
     }
 }
 
-module.exports = { createComment, deleteComment, getComments }
+module.exports = { createComment, deleteComment, getComments, editComment }

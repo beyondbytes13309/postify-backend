@@ -12,14 +12,16 @@ const permissions = {
         'edit_own_post', 
         'delete_own_post', 
         'delete_own_reaction',
-        'delete_own_comment'],
+        'delete_own_comment',
+        'edit_own_comment'],
     admin: [
         'create_post', 
         'edit_any_profile', 
         'ban_any_user', 
         'delete_any_post', 
         'delete_own_reaction',
-        'delete_any_comment'],
+        'delete_any_comment',
+        'edit_own_comment'],
     banned: []
 };
 

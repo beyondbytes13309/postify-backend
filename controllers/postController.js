@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const post = require('../routes/post')
 
 const createPost = async (Post, Reaction, req, res) => {
     const { postText } = req.body
@@ -153,4 +154,58 @@ const deletePost = async (Post, Reaction, Comment, req, res) => {
     
 }
 
-module.exports = { createPost, getPosts, getUserPosts, deletePost }
+const editPost = async (Post, req, res) => {
+  const postID = req?.params?.postID;
+  const postText = req?.body?.postText;
+
+  if (!mongoose.Types.ObjectId.isValid(postID) || !postText) {
+    return res.status(400).json({ code: "010", data: "Data required!" });
+  }
+
+  try {
+    const result = await Post.findOneAndUpdate(
+      { _id: postID },
+      { $set: { postText } },
+      { new: true, runValidators: true }
+    )
+      .select("-__v -updatedAt")
+      .populate("authorID", "displayName profilePicURL")
+      .lean();
+
+    if (!result) {
+      return res.status(404).json({ code: "016", data: "Post not found!" });
+    }
+
+    return res
+      .status(200)
+      .json({
+        code: "037",
+        data: { message: "Post edited successfully!", post: result },
+      });
+  } catch (err) {
+    if (err.name == "ValidationError") {
+      if (err.errors?.postText?.kind == "maxlength") {
+        return res
+          .status(400)
+          .json({
+            code: "027",
+            data: "Post is longer than maximum allowed length",
+          });
+      } else if (err.errors?.postText.kind == "minlength") {
+        return res
+          .status(400)
+          .json({
+            code: "027",
+            data: "Post is shorter than minimum allowed length",
+          });
+      }
+      return res.status(400).json({ code: "027", data: "Incorrect data" });
+    }
+
+    return res
+      .status(500)
+      .json({ code: "550", data: "Unexpected error occured!" });
+  }
+};
+
+module.exports = { createPost, getPosts, getUserPosts, deletePost, editPost }

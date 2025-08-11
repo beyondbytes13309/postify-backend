@@ -1,5 +1,5 @@
 const express = require('express')
-const { createPost, getPosts, getUserPosts, deletePost } = require('../controllers/postController')
+const { createPost, getPosts, getUserPosts, deletePost, editPost } = require('../controllers/postController')
 const { authorize } = require('../middleware/authVerification.js')
 
 module.exports = (Post, Reaction, Comment) => {
@@ -11,6 +11,9 @@ module.exports = (Post, Reaction, Comment) => {
     Router.delete('/deletePost/:postID', authorize(['delete_own_post', 'delete_any_post'], async function(req) {
         return await Post.findById(req.params.postID)
     }), (req, res) => deletePost(Post, Reaction, Comment, req, res))
+    Router.patch('/editPost/:postID', authorize(['edit_own_post'], async function(req) {
+        return await Post.findById(req.params.postID)
+    }), (req, res) => editPost(Post, req, res))
 
     return Router
 }

@@ -105,10 +105,12 @@ const editUser = async (User, req, res) => {
   return res.status(200).json({ code: "020" });
 };
 
-const getUserData = (req, res) => {
+const getUserData = async (Post, req, res) => {
+  const user = req?.user
+  const numOfPosts = await Post.countDocuments({ authorID: user?._id })
    return res.json({
       code: '055',
-      user: sanitizeUser(req.user)
+      user: {...sanitizeUser(user), numOfPosts}
     });
 }
 

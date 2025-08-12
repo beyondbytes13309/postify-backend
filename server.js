@@ -59,7 +59,7 @@ const mainFunction = async () => {
 
     await connectToDB(process.env.MONGODB_CONNECTION_STRING)
     app.use('/auth', auth(User))
-    app.use('/user', checkAuth, user(User, uploads, cloudinary))
+    app.use('/user', checkAuth, user(User, Post, uploads, cloudinary))
     app.use('/post', checkAuth, post(Post, Reaction, Comment))
     app.use('/reaction', checkAuth, reaction(Reaction, Post))
     app.use('/comment', checkAuth, comment(Comment, Post))

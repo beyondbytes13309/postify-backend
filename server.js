@@ -20,7 +20,7 @@ const reaction = require('./routes/reaction.js')
 const comment = require('./routes/comment.js')
 
 
-const { checkAuth, authorize } = require('./middleware/authVerification.js')
+const { checkAuth, authorize, checkRestriction } = require('./middleware/authVerification.js')
 
 const initialize = require('./utils/passportConfig.js')
 const { setupCloudinary } = require('./utils/cloudinaryConfig.js')
@@ -51,6 +51,7 @@ app.use(passport.initialize())
 initialize(passport)
 app.use(passport.session())
 app.use(checkAuth)
+app.use(checkRestriction())
 
 
 const { uploads, cloudinary } = setupCloudinary()

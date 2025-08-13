@@ -56,9 +56,14 @@ const userSchema = new mongoose.Schema({
     hasDefaultPfp: { type: Boolean, default: true },
     googleID: {type: String},
     githubID: {type: String},
-    role: {type: String, enum: ['user', 'jrmod', 'srmod', 'admin', 'owner', 'banned', 'restricted'], default: 'user'},
+    role: {type: String, enum: ['user', 'moderator', 'admin', 'restricted'], default: 'user'},
     numOfPosts: { type: Number, default: 0 },
-    numOfMembers: { type: Number, default: 0 }
+    numOfMembers: { type: Number, default: 0 },
+    restrictionObject: {
+        level: { type: Number, enum: [0, 1, 2, 3], default: 0 }, 
+        expiresAt: { type: Date, default: null }, 
+        reason: { type: String, maxlength: 50, default: null }
+    }
 }, {
     timestamps: true
 })

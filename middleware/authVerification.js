@@ -15,16 +15,17 @@ const permissions = {
         'delete_own_comment',
         'edit_own_comment',
         'edit_own_post'],
+    moderator: [],
     admin: [
         'create_post', 
         'edit_any_profile', 
-        'ban_any_user', 
+        'restrict_user', 
         'delete_any_post', 
         'delete_own_reaction',
         'delete_any_comment',
         'edit_own_comment',
         'edit_own_post'],
-    banned: []
+    restricted: []
 };
 
 const can = (action, user, resource = null) => {
@@ -67,6 +68,30 @@ const authorize = (actions, resourceFetcher = null) => {
     };
 };
 
+const checkRestriction = () => {
+    return async function (req, res, next) {
+        const authPaths = ['/auth/login', '/auth/register', '/auth/google', '/auth/github', '/auth/google/callback', '/auth/github/callback']
+        if (authPaths.includes(req.path)) {return next()}
+
+        const user = req.user
+        const restrictionObject = user?.restrictionObject
+        const now = new Date();
+
+        if (!restrictionObject) {
+            return next()
+        }
+
+        if (restrictionObject.level > 0 && restrictionObject.expiresAt <= now) {
+            restrictionObject.level = 0;
+            restrictionObject.reason = null;
+            restrictionObject.expiresAt = null
+            user.role = 'user'
+            await req.user.save()
+        }
+
+        next()
+    }
+}
 
 
-module.exports = { checkAuth, authorize }
+module.exports = { checkAuth, authorize, checkRestriction }

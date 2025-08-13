@@ -15,6 +15,11 @@ const levelMap = {
   'level-3': 3
 };
 
+const powerMap = {
+  'moderator': 1,
+  'admin': 2
+}
+
 const uploadPfp = (User, uploads, cloudinary, req, res) => {
   uploads.single("image")(req, res, async function (err) {
     if (err) {
@@ -134,10 +139,12 @@ const restrictUser = async (User, req, res) => {
 
   const reason = req?.query?.reason || `Level ${level} restriction`
 
+  const roleOfStaffMember = req.user.role
+  const powerOfStaffMemberBanning = powerMap[roleOfStaffMember]
+
   const durationSec = parseInt(duration) > 0
     ? parseInt(duration)
     : 60 * 60 ; // in seconds
-
 
   if (!mongoose.Types.ObjectId.isValid(userID)) {
     return res.status(400).json({ code: '010', data: 'Invalid userID!' })
@@ -152,6 +159,13 @@ const restrictUser = async (User, req, res) => {
     if (!user) {
       return res.status(404).json({ code: '001', data: 'User not found'})
     }
+
+    const powerOfUserBeingRestricted = powerMap[user.role]
+
+    if (powerOfUserBeingRestricted >= powerOfStaffMemberBanning) {
+      return res.status(403).json({ code: '041', data: 'You cannot restrict someone with a high or same rank!'})
+    }
+    
     user.role = 'restricted'
     user.restrictionObject.level = level;
     user.restrictionObject.expiresAt = new Date(Date.now() + durationSec * 1000);

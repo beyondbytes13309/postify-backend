@@ -111,7 +111,8 @@ const can = (action, user, resource = null) => {
 
     // Handle '_own_' actions
     if (action.includes('_own_') && resource) {
-        if (resource.authorID?.toString?.() === user?._id?.toString?.()) {
+        const authorID = resource?.authorID?._id ?? resource?.authorID;
+        if (authorID?.toString() === user?._id?.toString()) {
             return rolePerms.includes(action);
         }
         return false;

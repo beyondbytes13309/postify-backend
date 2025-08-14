@@ -10,10 +10,10 @@ module.exports = (Comment, Post) => {
     Router.post('/createComment', authorize(['make_comment']), (req, res) => createComment(Comment, req, res));
     Router.get('/getComments', authorize(['view_comments']), (req, res) => getComments(Comment, req, res))
     Router.patch('/editComment/:commentID', authorize(['edit_own_comment', 'edit_any_comment'], async function(req) {
-        return Comment.findById(req.params.commentID)
+        return await Comment.findById(req.params.commentID).populate('authorID', 'role')
     }), (req, res) => editComment(Comment, req, res))
-    Router.delete('/deleteComment/:commentID', authorize(['delete_own_comment', 'delete_any_comment'], async function(req) {
-        return await Comment.findById(req.params.commentID)
+    Router.get('/deleteComment/:commentID', authorize(['delete_own_comment', 'delete_any_comment'], async function(req) {
+        return await Comment.findById(req.params.commentID).populate('authorID', 'role')
     }), (req, res) => deleteComment(Comment, req, res))
     return Router
 }

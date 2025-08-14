@@ -5,6 +5,13 @@ const checkAuth = (req, res, next) => {
     return next()
 }
 
+const powerMap = {
+    'restricted': -1,
+    'user': 0,
+    'moderator': 1,
+    'admin': 2
+}
+
 const perms = {
     CREATE_POST: 'create_post',
     EDIT_OWN_POST: 'edit_own_post',
@@ -93,14 +100,13 @@ const classified_permissions = {
 };
 
 const can = (action, user, resource = null) => {
-    const role = user?.role
+    const roleOfUserPerformingAction = user?.role
     let rolePerms = []
-    if (role == 'restricted') {
+    if (roleOfUserPerformingAction == 'restricted') {
         rolePerms = classified_permissions[`restricted_l${user?.restrictionObject?.level}`] || []
     } else {
-        rolePerms = classified_permissions[role] || []
+        rolePerms = classified_permissions[roleOfUserPerformingAction] || []
     }
-    console.log(rolePerms)
 
     // Handle '_own_' actions
     if (action.includes('_own_') && resource) {
@@ -108,6 +114,18 @@ const can = (action, user, resource = null) => {
             return rolePerms.includes(action);
         }
         return false;
+    }
+
+    // Handle '_any_' actions
+    if (action.includes('_any_') && resource) {
+        const roleOfOwnerOfResource = resource?.authorID?.role
+        if (!roleOfOwnerOfResource) {
+            return false
+        }
+        if (powerMap[roleOfUserPerformingAction] <= powerMap[roleOfOwnerOfResource]) {
+            return false
+        }
+        return true
     }
 
     // General permission check

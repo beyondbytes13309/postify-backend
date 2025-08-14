@@ -9,10 +9,10 @@ module.exports = (Post, Reaction, Comment) => {
     Router.get('/getPosts', authorize(['view_posts']), (req, res) => getPosts(Post, Reaction, Comment, req, res))
     Router.get('/getUserPosts/:userID', authorize(['view_posts']), (req, res) => getUserPosts(Post, Reaction, Comment, req, res))
     Router.delete('/deletePost/:postID', authorize(['delete_own_post', 'delete_any_post'], async function(req) {
-        return await Post.findById(req.params.postID)
+        return await Post.findById(req.params.postID).populate('authorID', 'role')
     }), (req, res) => deletePost(Post, Reaction, Comment, req, res))
     Router.patch('/editPost/:postID', authorize(['edit_own_post'], async function(req) {
-        return await Post.findById(req.params.postID)
+        return await Post.findById(req.params.postID).populate('authorID', 'role')
     }), (req, res) => editPost(Post, req, res))
 
     return Router

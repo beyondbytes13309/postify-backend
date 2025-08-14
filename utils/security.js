@@ -7,7 +7,8 @@ const sanitizeUser = (user) => {
         bio: user.bio,
         profilePicURL: user.profilePicURL,
         role: user.role,
-        createdAt: user.createdAt
+        createdAt: user.createdAt,
+        restrictionObject: user.restrictionObject
     }
 }
 

@@ -11,7 +11,7 @@ module.exports = (Post, Reaction, Comment) => {
     Router.delete('/deletePost/:postID', authorize(['delete_own_post', 'delete_any_post'], async function(req) {
         return await Post.findById(req.params.postID).populate('authorID', 'role')
     }), (req, res) => deletePost(Post, Reaction, Comment, req, res))
-    Router.patch('/editPost/:postID', authorize(['edit_own_post'], async function(req) {
+    Router.patch('/editPost/:postID', authorize(['edit_own_post', 'edit_any_post'], async function(req) {
         return await Post.findById(req.params.postID).populate('authorID', 'role')
     }), (req, res) => editPost(Post, req, res))
 

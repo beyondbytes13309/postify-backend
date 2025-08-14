@@ -126,7 +126,7 @@ const can = (action, user, resource = null) => {
         if (powerMap[roleOfUserPerformingAction] <= powerMap[roleOfOwnerOfResource]) {
             return false
         }
-        return true
+        return rolePerms.includes(action)
     }
 
     // General permission check
@@ -144,7 +144,6 @@ const authorize = (actions, resourceFetcher = null) => {
             }
 
             const isAllowed = actions.some(action => can(action, user, resource));
-
 
             if (isAllowed) {
                 return next();

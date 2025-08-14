@@ -6,6 +6,7 @@ const checkAuth = (req, res, next) => {
 }
 
 const powerMap = {
+    'deleted': -2,
     'restricted': -1,
     'user': 0,
     'moderator': 1,
@@ -118,10 +119,9 @@ const can = (action, user, resource = null) => {
 
     // Handle '_any_' actions
     if (action.includes('_any_') && resource) {
-        const roleOfOwnerOfResource = resource?.authorID?.role
-        if (!roleOfOwnerOfResource) {
-            return false
-        }
+        const ownerOfResource = resource?.authorID
+        const roleOfOwnerOfResource = ownerOfResource?.role || 'deleted'
+
         if (powerMap[roleOfUserPerformingAction] <= powerMap[roleOfOwnerOfResource]) {
             return false
         }

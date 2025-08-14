@@ -17,7 +17,7 @@ const createComment = async (Comment, req, res) => {
 
     try {
         await comment.save()
-        await comment.populate('authorID', 'displayName profilePicURL')
+        await comment.populate('authorID', 'displayName profilePicURL role')
         const finalObjToSend = comment.toObject();
 
         return res.status(201).json({ code: '031', data: {message: 'Comment created successfully', comment: finalObjToSend}})
@@ -55,7 +55,7 @@ const getComments = async (Comment, req, res) => {
 
         const comments = await query
             .select('-__v -updatedAt')
-            .populate('authorID', 'displayName profilePicURL')
+            .populate('authorID', 'displayName profilePicURL role')
             .lean();
 
         return res.status(200).json({ code: '032', data: comments });
@@ -80,7 +80,7 @@ const editComment = async (Comment, req, res) => {
             { new: true, runValidators: true }
         )
         .select('-__v -updatedAt')
-        .populate('authorID', 'displayName profilePicURL')
+        .populate('authorID', 'displayName profilePicURL role')
         .lean();
 
         if (!result) {

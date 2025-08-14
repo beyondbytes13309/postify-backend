@@ -56,7 +56,7 @@ const getPosts = async (Post, Reaction, Comment, req, res) => {
 
         const posts = await query
             .sort({ createdAt: -1 })
-            .populate('authorID', '_id displayName profilePicURL')
+            .populate('authorID', '_id displayName profilePicURL role')
         
 
         const postsWithReactions = await Promise.all(
@@ -100,7 +100,7 @@ const getUserPosts = async (Post, Reaction, Comment, req, res) => {
 
         const posts = await query
             .sort({ createdAt: -1 })
-            .populate('authorID', '_id displayName profilePicURL')
+            .populate('authorID', '_id displayName profilePicURL role')
 
         const postsWithReactions = await Promise.all(
             posts.map(async (post) => {

@@ -118,14 +118,39 @@ const editUser = async (User, req, res) => {
   return res.status(200).json({ code: "020" });
 };
 
+
 const getUserData = async (Post, req, res) => {
   const user = req?.user
   const numOfPosts = await Post.countDocuments({ authorID: user?._id })
-   return res.json({
+  return res.json({
+    code: '055',
+    user: {...sanitizeUser(user), numOfPosts}
+  });
+}
+
+const getAnyUserData = async (Post, User, req, res) => {
+  const userID = req?.params?.userID
+  if (!mongoose.Types.ObjectId.isValid(userID)) {
+    return res.status(400).json({ code: '010', data: 'Invalid userID!' })
+  }
+
+  try {
+    const user = await User.findById(userID)
+
+    if (!user) {
+      return res.status(404).json({ code: '001', data: 'User not found'})
+    }
+    const numOfPosts = await Post.countDocuments({ authorID: user._id })
+    return res.json({
       code: '055',
       user: {...sanitizeUser(user), numOfPosts}
     });
+  } catch(e) {
+    return res.status(500).json({ code: '550', data: "Unexpected error occured!" })
+  }
+   
 }
+
 
 const restrictUser = async (User, req, res) => {
   const userID = req?.params?.userID
@@ -179,4 +204,4 @@ const restrictUser = async (User, req, res) => {
   }
 }
 
-module.exports = { uploadPfp, editUser, getUserData, restrictUser };
+module.exports = { uploadPfp, editUser, getUserData, getAnyUserData, restrictUser };

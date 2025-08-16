@@ -47,9 +47,20 @@ const uploadPfp = (User, uploads, cloudinary, req, res) => {
 
 const editUser = async (User, req, res) => {
   const { username, bio, displayName } = req.body;
-  const user = await User.findById(req.user._id);
+  let user
+  let userID = req?.params?.userID
+
+  if (!mongoose.Types.ObjectId.isValid(userID)) {
+    userID = req?.user?._id
+  }
 
   try {
+    user = await User.findById(userID);
+
+    if (!user) {
+      return res.status(404).json({ code: '001', data: 'User not found'})
+    }
+
     if (username && user.username != username) {
       user.username = username.trim();
     }
@@ -118,7 +129,6 @@ const editUser = async (User, req, res) => {
   return res.status(200).json({ code: "020" });
 };
 
-
 const getUserData = async (Post, req, res) => {
   const user = req?.user
   const numOfPosts = await Post.countDocuments({ authorID: user?._id })
@@ -142,7 +152,7 @@ const getAnyUserData = async (Post, User, req, res) => {
     }
     const numOfPosts = await Post.countDocuments({ authorID: user._id })
     return res.json({
-      code: '055',
+      code: '056',
       user: {...sanitizeUser(user), numOfPosts}
     });
   } catch(e) {

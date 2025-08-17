@@ -1,12 +1,15 @@
 const express = require('express')
-const { uploadPfp, editUser, editSpecificUser, getUserData, getAnyUserData, restrictUser } = require('../controllers/userController')
+const { editPfp, editSpecificPfp, editUser, editSpecificUser, getUserData, getAnyUserData, restrictUser } = require('../controllers/userController')
 
 const { authorize } = require('../middleware/authVerification.js')
 
 module.exports = function(User, Post, uploads, cloudinary) {
     const Router = express.Router()
     
-    Router.post("/uploadPfp", authorize(['edit_own_profile', 'edit_any_profile']), (req, res) => uploadPfp(User, uploads, cloudinary, req, res));
+    Router.patch("/editPfp", authorize(['edit_own_profile']), (req, res) => editPfp(User, uploads, cloudinary, req, res));
+    Router.patch('/editSpecificPfp/:userID', authorize(['edit_any_profile'], async function(req) {
+        return await User.findById(req.params.userID)
+    }), (req, res) => editSpecificPfp(User, uploads, cloudinary, req, res))
     Router.patch('/editUser', authorize(['edit_own_profile']), async (req, res) => editUser(req, res))
     Router.patch('/editSpecificUser/:userID', authorize(['edit_any_profile'], async function(req) {
         return await User.findById(req.params.userID)

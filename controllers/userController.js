@@ -20,29 +20,77 @@ const powerMap = {
   'admin': 2
 }
 
-const uploadPfp = (User, uploads, cloudinary, req, res) => {
-  uploads.single("image")(req, res, async function (err) {
+const editPfpHelper = (uploads, cloudinary, req, res, user) => {
+  return new Promise((resolve, reject) => {
+    uploads.single("image")(req, res, async function (err) {
     if (err) {
-      return res.status(400).json({ code: "030", data: err.message });
+      //return res.status(400).json({ code: "030", data: err.message });
+      return reject({ code: "030", data: err.message });
     }
 
     if (!req.file) {
-      return res
+      /*return res
         .status(400)
-        .json({ code: "031", data: "No image file uploaded" });
+        .json({ code: "031", data: "No image file uploaded" }); */
+      return reject({ code: "031", data: "No image file uploaded" })
     }
-    const user = await User.findOne({ _id: req.user._id });
-    if (!user.hasDefaultPfp) {
-      await cloudinary.uploader.destroy(getPublicIdFromUrl(user.profilePicURL));
-    } else {
-      user.hasDefaultPfp = false;
+
+    try {
+      if (!user.hasDefaultPfp) {
+        await cloudinary.uploader.destroy(getPublicIdFromUrl(user.profilePicURL));
+      } else {
+        user.hasDefaultPfp = false;
+      }
+      user.profilePicURL = req.file.path;
+
+      await user.save();
+
+      resolve({ code: "032", data: "Saved profile picture" })
+    } catch(e) {
+      reject({ code: '550', data: "Unexpected error occured!" })
     }
-    user.profilePicURL = req.file.path;
 
-    await user.save();
-
-    return res.status(200).json({ code: "032", data: "Saved profile picture" });
   });
+  })
+}
+
+const editPfp = async (User, uploads, cloudinary, req, res) => {
+  const user = req?.user
+
+  if (!user) {
+    return res.status(404).json({ code: '001', data: 'User not found'})
+  }
+
+  try {
+    const result = await editPfpHelper(uploads, cloudinary, req, res, user)
+    return res.status(200).json(result);
+  } catch(e) {
+    if (e.code == '550') return res.status(500).json(e)
+    return res.status(400).json(e) 
+  }
+
+};
+
+const editSpecificPfp = async (User, uploads, cloudinary, req, res) => {
+  const userID = req?.params?.userID
+
+  if (!mongoose.Types.ObjectId.isValid(userID)) {
+    return res.status(400).json({ code: '010', data: 'Invalid userID!' })
+  }
+
+  const user = await User.findById(userID)
+
+  if (!user) {
+    return res.status(404).json({ code: '001', data: 'User not found'})
+  }
+
+  try {
+    const result = await editPfpHelper(uploads, cloudinary, req, res, user)
+    return res.status(200).json(result);
+  } catch(e) {
+    if (e.code == '550') return res.status(500).json(e)
+    return res.status(400).json(e) 
+  }
 };
 
 const editUserHelper = async (req, res, user) => {
@@ -226,4 +274,4 @@ const restrictUser = async (User, req, res) => {
   }
 }
 
-module.exports = { uploadPfp, editUser, editSpecificUser, getUserData, getAnyUserData, restrictUser };
+module.exports = { editPfp, editSpecificPfp, editUser, editSpecificUser, getUserData, getAnyUserData, restrictUser };

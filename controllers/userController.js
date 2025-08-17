@@ -45,18 +45,10 @@ const uploadPfp = (User, uploads, cloudinary, req, res) => {
   });
 };
 
-const editUser = async (User, req, res) => {
-  const { username, bio, displayName } = req.body;
-  let user
-  let userID = req?.params?.userID
-
-  if (!mongoose.Types.ObjectId.isValid(userID)) {
-    userID = req?.user?._id
-  }
+const editUserHelper = async (req, res, user) => {
+  const { username, bio, displayName } = req?.body;
 
   try {
-    user = await User.findById(userID);
-
     if (!user) {
       return res.status(404).json({ code: '001', data: 'User not found'})
     }
@@ -127,7 +119,27 @@ const editUser = async (User, req, res) => {
   }
 
   return res.status(200).json({ code: "020" });
+}
+
+const editUser = async (req, res) => {
+  const user = req?.user
+
+  editUserHelper(req, res, user)
+  
 };
+
+const editSpecificUser = async (User, req, res) => {
+  const userID = req?.params?.userID
+
+  if (!mongoose.Types.ObjectId.isValid(userID)) {
+    return res.status(400).json({ code: '010', data: 'Invalid userID!' })
+  }
+
+  const user = await User.findById(userID)
+
+  editUserHelper(req, res, user)
+  
+}
 
 const getUserData = async (Post, req, res) => {
   const user = req?.user
@@ -214,4 +226,4 @@ const restrictUser = async (User, req, res) => {
   }
 }
 
-module.exports = { uploadPfp, editUser, getUserData, getAnyUserData, restrictUser };
+module.exports = { uploadPfp, editUser, editSpecificUser, getUserData, getAnyUserData, restrictUser };

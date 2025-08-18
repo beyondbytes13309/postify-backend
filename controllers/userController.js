@@ -221,7 +221,6 @@ const getAnyUserData = async (Post, User, req, res) => {
    
 }
 
-
 const restrictUser = async (User, req, res) => {
   const userID = req?.params?.userID
   const type = req?.query?.type || 'level-1'
@@ -234,19 +233,20 @@ const restrictUser = async (User, req, res) => {
 
   const reason = req?.query?.reason || `Level ${level} restriction`
 
-  const roleOfStaffMember = req.user.role
-  const powerOfStaffMemberBanning = powerMap[roleOfStaffMember]
-
   const durationSec = parseInt(duration) > 0
     ? parseInt(duration)
-    : 60 * 60 ; // in seconds
+    : 0; // in seconds
+
+  if (durationSec < 300 || durationSec > 86400) {
+    return res.status(403).json({ code: '042', data: 'Duration is too short or too long!'})
+  }
+
+  if (reason?.length > 50) {
+    return res.status(403).json({ code: '043', data: 'Reason length is too long!'})
+  }
 
   if (!mongoose.Types.ObjectId.isValid(userID)) {
     return res.status(400).json({ code: '010', data: 'Invalid userID!' })
-  }
-
-  if (userID === String(req.user._id)) {
-    return res.status(403).json({ code: '039', data: 'You cannot restrict yourself'})
   }
 
   try {
@@ -255,12 +255,6 @@ const restrictUser = async (User, req, res) => {
       return res.status(404).json({ code: '001', data: 'User not found'})
     }
 
-    const powerOfUserBeingRestricted = powerMap[user.role]
-
-    if (powerOfUserBeingRestricted >= powerOfStaffMemberBanning) {
-      return res.status(403).json({ code: '041', data: 'You cannot restrict someone with a high or same rank!'})
-    }
-    
     user.role = 'restricted'
     user.restrictionObject.level = level;
     user.restrictionObject.expiresAt = new Date(Date.now() + durationSec * 1000);

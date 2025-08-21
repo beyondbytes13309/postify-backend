@@ -65,9 +65,10 @@ const getPosts = async (Post, Reaction, Comment, req, res) => {
             const numOfComments = await Comment.countDocuments({ postID: post._id })
             const userReactionObj = reactions.find(r => r.authorID == req.user?._id)
             const userReaction = userReactionObj ? userReactionObj.reactionType : null
+            const reactionsToBeSent = reactions.map(r => r.reactionType)
             return {
               ...post.toObject(),
-              reactions,
+              reactions: reactionsToBeSent,
               userReaction,
               userReactionID: userReactionObj?._id,
               numOfComments
@@ -108,9 +109,10 @@ const getUserPosts = async (Post, Reaction, Comment, req, res) => {
             const numOfComments = await Comment.countDocuments({ postID: post._id })
             const userReactionObj = reactions.find(r => r.authorID == req.user?._id)
             const userReaction = userReactionObj ? userReactionObj.reactionType : null
+            const reactionsToBeSent = reactions.map(r => r.reactionType)
             return {
                 ...post.toObject(),
-                reactions,
+                reactions: reactionsToBeSent,
                 userReaction,
                 userReactionID: userReactionObj?._id,
                 numOfComments
@@ -165,7 +167,7 @@ const editPost = async (Post, req, res) => {
   try {
     const result = await Post.findOneAndUpdate(
       { _id: postID },
-      { $set: { postText } },
+      { $set: { postText, isEdited: true } },
       { new: true, runValidators: true }
     )
       .select("-__v -updatedAt")

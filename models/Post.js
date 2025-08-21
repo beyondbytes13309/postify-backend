@@ -9,7 +9,8 @@ const postSchema = new mongoose.Schema({
         type: String,
         minlength: 10,
         maxlength: 300
-    }
+    },
+    isEdited: { type: Boolean, default: false }
 }, {
     timestamps: true
 })

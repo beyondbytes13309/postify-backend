@@ -109,14 +109,37 @@ server.js       # Entry point
 
 ## 🌐API Endpoints
 
-- `/auth` — Authentication (local, Google, GitHub)
-- `/user` — User profile management
-- `/post` — Post CRUD
-- `/comment` — Comment CRUD
-- `/reaction` — Reaction CRUD
+### 🔑 `/auth` — Authentication
+- `GET /auth/google` → Google OAuth Login
+- `GET /auth/github` → GitHub OAuth Login
+- `POST /auth/register` → Register a new user
+- `POST /auth/login` → Login with username and password
+- `POST /auth/logout` → Logout from account
+### 👤 `/user` — User profile management
+- `GET /getUserData` → Get current user's profile data
+- `GET /getAnyUserData/:userID` → Get profile data of any user
+- `PATCH /user/editUser` → Edit user fields: username, display name and bio
+- `PATCH /user/editSpecificUser/:userID` → Edit any user's fields (for admins)
+- `PATCH /user/editPfp` → Edit user's profile picture
+- `PATCH /user/editSpecificPfp/:userID` → Edit any user's profile picture (for admins)
+- `PATCH /restrictUser/:userID` → Restrict users (for admins and moderators)
+### 📝 `/post` — Post CRUD
+- `GET /post/getPosts` → Get posts 
+- `GET /post/getUserPosts/:userID` → Get a user's posts
+- `POST /post/createPost` → Create a post
+- `POST /post/editPost/:postID` → Edit a post
+- `DELETE /post/deletePost/:postID` → Delete a post
+### 💬 `/comment` — Comment CRUD
+- `GET /comment/getComments` → Get comments for a post
+- `POST /comment/createComment` → Create a comment
+- `PATCH /comment/editComment/:commentID` → Edit a comment
+- `DELETE /comment/deleteComment/:commentID` → Delete a comment
+### 😮 `/reaction` — Reaction CRUD
+ - `POST /reaction/makeReaction` → Make a reaction
+ - `DELETE /reaction/deleteReaction/:reactionID` → Delete a reaction
 
-All endpoints require authentication and authorization except `/auth/*`.
-
+⚠️ All endpoints require authentication and authorization except `/auth/*`.
+️
 ---
 
 ## 🤝Contributing

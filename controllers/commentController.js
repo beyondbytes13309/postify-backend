@@ -36,7 +36,7 @@ const createComment = async (Comment, req, res) => {
 }
 
 const getComments = async (Comment, req, res) => {
-    const postID = req.query.postID
+    const postID = req?.params?.postID
     const maxNumOfComments = 10
     const page = parseInt(req.query.page) || 1
     const skip = (page - 1) * maxNumOfComments;

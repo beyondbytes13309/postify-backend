@@ -8,7 +8,7 @@ module.exports = (Comment, Post) => {
     const Router = express.Router()
 
     Router.post('/createComment', authorize(['make_comment']), (req, res) => createComment(Comment, req, res));
-    Router.get('/getComments', authorize(['view_comments']), (req, res) => getComments(Comment, req, res))
+    Router.get('/getComments/:postID', authorize(['view_comments']), (req, res) => getComments(Comment, req, res))
     Router.patch('/editComment/:commentID', authorize(['edit_own_comment', 'edit_any_comment'], async function(req) {
         return await Comment.findById(req.params.commentID).populate('authorID', 'role')
     }), (req, res) => editComment(Comment, req, res))

@@ -130,7 +130,7 @@ server.js       # Entry point
 - `POST /post/editPost/:postID` → Edit a post
 - `DELETE /post/deletePost/:postID` → Delete a post
 ### 💬 `/comment` — Comment CRUD
-- `GET /comment/getComments` → Get comments for a post
+- `GET /comment/getComments/:postID` → Get comments for a post
 - `POST /comment/createComment` → Create a comment
 - `PATCH /comment/editComment/:commentID` → Edit a comment
 - `DELETE /comment/deleteComment/:commentID` → Delete a comment

@@ -36,7 +36,7 @@ Handles authentication, posts, comments, reactions, and user profiles with role-
 - [Multer](https://github.com/expressjs/multer) (file uploads)
 - [dotenv](https://github.com/motdotla/dotenv) (environment variables)
 
----.
+---
 
 ## ⚙️Getting Started
 
@@ -138,8 +138,11 @@ server.js       # Entry point
  - `POST /reaction/makeReaction` → Make a reaction
  - `DELETE /reaction/deleteReaction/:reactionID` → Delete a reaction
 
-⚠️ All endpoints require authentication and authorization except `/auth/*`.
-️
+### 📝 Few Notes
+- All endpoints require authentication and authorization except `/auth`
+- All the custom status codes can be found at [docs/status_codes.xlsx](docs/status_codes.xlsx)
+
+
 ---
 
 ## 🤝Contributing

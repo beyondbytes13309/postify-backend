@@ -9,13 +9,13 @@ const reactionSchema = new mongoose.Schema({
         type: Number,
         min: 0, max: 10,
     },
-    postID: {
+    resourceID: {
         type: String,
         required: true
     }
 })
 
-reactionSchema.index({ authorID: 1, postID: 1 }, { unique: true });
+reactionSchema.index({ authorID: 1, resourceID: 1 }, { unique: true });
 
 const Reaction = mongoose.model('Reaction', reactionSchema)
 

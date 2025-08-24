@@ -62,8 +62,8 @@ const mainFunction = async () => {
     app.use('/auth', auth(User))
     app.use('/user', checkAuth, user(User, Post, uploads, cloudinary))
     app.use('/post', checkAuth, post(Post, Reaction, Comment))
-    app.use('/reaction', checkAuth, reaction(Reaction, Post))
-    app.use('/comment', checkAuth, comment(Comment, Post))
+    app.use('/reaction', checkAuth, reaction(Reaction, Post, Comment))
+    app.use('/comment', checkAuth, comment(Comment, Reaction))
 
 }
 

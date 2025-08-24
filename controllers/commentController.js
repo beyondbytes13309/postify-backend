@@ -35,7 +35,7 @@ const createComment = async (Comment, req, res) => {
     }
 }
 
-const getComments = async (Comment, req, res) => {
+const getComments = async (Comment, Reaction, req, res) => {
     const postID = req?.params?.postID
     const maxNumOfComments = 10
     const page = parseInt(req.query.page) || 1
@@ -58,7 +58,22 @@ const getComments = async (Comment, req, res) => {
             .populate('authorID', 'displayName profilePicURL role')
             .lean();
 
-        return res.status(200).json({ code: '032', data: comments });
+        const commentsWithReactions = await Promise.all(
+          comments.map(async (comment) => {
+            const reactions = await Reaction.find({ resourceID: comment._id }).select('reactionType authorID _id')
+            const userReactionObj = reactions.find(r => r.authorID == req.user?._id)
+            const userReaction = userReactionObj ? userReactionObj.reactionType : null
+            const reactionsToBeSent = reactions.map(r => r.reactionType)
+            return {
+              ...comment,
+              reactions: reactionsToBeSent,
+              userReaction,
+              userReactionID: userReactionObj?._id,
+            };
+          })
+        );
+
+        return res.status(200).json({ code: '032', data: commentsWithReactions });
     } catch (e) {
         return res.status(500).json({code: '550', data: 'Unexpected error occured!'})
     }

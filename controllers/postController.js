@@ -61,7 +61,7 @@ const getPosts = async (Post, Reaction, Comment, req, res) => {
 
         const postsWithReactions = await Promise.all(
           posts.map(async (post) => {
-            const reactions = await Reaction.find({ postID: post._id }).select('reactionType authorID _id')
+            const reactions = await Reaction.find({ resourceID: post._id }).select('reactionType authorID _id')
             const numOfComments = await Comment.countDocuments({ postID: post._id })
             const userReactionObj = reactions.find(r => r.authorID == req.user?._id)
             const userReaction = userReactionObj ? userReactionObj.reactionType : null

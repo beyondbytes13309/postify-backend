@@ -11,7 +11,7 @@ const postSchema = new mongoose.Schema({
         maxlength: 300
     },
     isEdited: { type: Boolean, default: false },
-    tags: { type: Object}
+    tags: { type: Object, select: false }
 }, {
     timestamps: true
 })

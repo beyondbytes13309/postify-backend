@@ -3,6 +3,25 @@ const post = require('../routes/post')
 const { groups, indexes } = require('../configs/tags.json');
 const { generateWeightedTagsFromContent } = require('../utils/tagging')
 
+function cosineSimilaritySparse(userTags, postTags) {
+    if (!userTags || typeof userTags !== 'object') return 0;
+    if (!postTags || typeof postTags !== 'object') return 0;
+
+    let dot = 0, normA = 0, normB = 0;
+    const allKeys = new Set([...Object.keys(userTags), ...Object.keys(postTags)]);
+    
+    for (let key of allKeys) {
+        const a = userTags[key] || 0;
+        const b = postTags[key] || 0;
+        dot += a * b;
+        normA += a * a;
+        normB += b * b;
+    }
+
+    if (normA === 0 || normB === 0) return 0;
+    return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+}
+
 const createPost = async (Post, Reaction, req, res) => {
     const { postText } = req.body
     if (!postText) {
@@ -12,7 +31,7 @@ const createPost = async (Post, Reaction, req, res) => {
     if (!Array.isArray(tags) && tags?.length>=3 && tags?.length <= 7) {
       return res.status(400).json({ code: '010', data: 'Invalid Tags!'})
     }
-      */
+    */
     const newPost = new Post({
         authorID: req.user._id,
         postText: postText,
@@ -137,7 +156,25 @@ const getUserPosts = async (Post, Reaction, Comment, req, res) => {
 }
 
 const getRecommendedPosts = async (Post, Reaction, Comment, req, res) => {
-  return res.status(200).json({ code: '013', data: 'This is just a test for now!' })
+  const allPosts = await Post.find().select('+tags').lean()
+  const user = req?.user
+  const limit = 3
+
+  const scoredPosts = allPosts.map(post => ({
+      post,
+      score: cosineSimilaritySparse(user.tags, post.tags)
+  }));
+
+  scoredPosts.sort((a, b) => b.score - a.score);
+
+  const recommendedPosts = scoredPosts.slice(0, limit).map(p => {
+    const {tags, ...everythingElse} = p.post
+    return everythingElse
+  })
+
+  return res.status(200).json({ code: '013', data: recommendedPosts });
+
+  // return res.status(200).json({ code: '013', data: 'This is just a test for now!' })
 }
 
 const deletePost = async (Post, Reaction, Comment, req, res) => {

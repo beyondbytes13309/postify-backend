@@ -1,0 +1,98 @@
+{
+  "groups": {
+    "tech_science": [
+      "programming",
+      "artificial_intelligence",
+      "gadgets",
+      "startups",
+      "space",
+      "science_news",
+      "cybersecurity",
+      "engineering"
+    ],
+    "gaming": [
+      "fps_games",
+      "rpg_games",
+      "mobile_gaming",
+      "esports",
+      "retro_gaming",
+      "game_development"
+    ],
+    "entertainment": [
+      "movies",
+      "tv_shows",
+      "music",
+      "celebrities",
+      "anime",
+      "books"
+    ],
+    "lifestyle_culture": [
+      "food",
+      "fitness",
+      "travel",
+      "fashion",
+      "health",
+      "education"
+    ],
+    "society_world": [
+      "politics",
+      "world_news",
+      "history",
+      "philosophy",
+      "religion",
+      "finance"
+    ],
+    "random_internet": [
+      "memes",
+      "funny",
+      "cringe",
+      "viral_trends",
+      "deep_thoughts",
+      "aesthetic",
+      "motivational",
+      "personal_stories"
+    ]
+  },
+  "indexes": {
+    "programming": 0,
+    "artificial_intelligence": 1,
+    "gadgets": 2,
+    "startups": 3,
+    "space": 4,
+    "science_news": 5,
+    "cybersecurity": 6,
+    "engineering": 7,
+    "fps_games": 8,
+    "rpg_games": 9,
+    "mobile_gaming": 10,
+    "esports": 11,
+    "retro_gaming": 12,
+    "game_development": 13,
+    "movies": 14,
+    "tv_shows": 15,
+    "music": 16,
+    "celebrities": 17,
+    "anime": 18,
+    "books": 19,
+    "food": 20,
+    "fitness": 21,
+    "travel": 22,
+    "fashion": 23,
+    "health": 24,
+    "education": 25,
+    "politics": 26,
+    "world_news": 27,
+    "history": 28,
+    "philosophy": 29,
+    "religion": 30,
+    "finance": 31,
+    "memes": 32,
+    "funny": 33,
+    "cringe": 34,
+    "garbage": 35,
+    "deep_thoughts": 36,
+    "aesthetic": 37,
+    "motivational": 38,
+    "personal_stories": 39
+  }
+}

@@ -49,6 +49,10 @@ const createPost = async (Post, Reaction, req, res) => {
     }
 }
 
+const getPostsHelper = () => {
+  // 😃
+}
+
 const getPosts = async (Post, Reaction, Comment, req, res) => {
     const maxNumOfPosts = 10
     const page = parseInt(req?.query?.page) || 1
@@ -130,6 +134,10 @@ const getUserPosts = async (Post, Reaction, Comment, req, res) => {
     } catch(e) {
         return res.status(500).json({code: '550', data: 'Unexpected error occured!'})
     }
+}
+
+const getRecommendedPosts = async (Post, Reaction, Comment, req, res) => {
+  return res.status(200).json({ code: '013', data: 'This is just a test for now!' })
 }
 
 const deletePost = async (Post, Reaction, Comment, req, res) => {
@@ -217,4 +225,4 @@ const editPost = async (Post, req, res) => {
   }
 };
 
-module.exports = { createPost, getPosts, getUserPosts, deletePost, editPost }
+module.exports = { createPost, getPosts, getRecommendedPosts, getUserPosts, deletePost, editPost }

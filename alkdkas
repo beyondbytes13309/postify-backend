@@ -1,0 +1,406 @@
+[33mcommit 685443896bce0b1cf2151bd6f75ab4cf721b9ad2[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeed-dev[m[33m, [m[1;31morigin/feed-dev[m[33m)[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Mon Aug 25 11:53:06 2025 +0500
+
+    feat(tagging): cache tag embeddings to reduce recomputation
+    
+    - added check to load tag embeddings from `tagVectors.json` if it exists
+    - compute and save embeddings only if cache is missing
+
+[33mcommit e653ad42150464272be2078ca7b4b0a4ed118a49[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Mon Aug 25 11:39:49 2025 +0500
+
+    feat(posts): add AI-powered tag generation and expand tag taxonomy
+    
+    - added `generateWeightedTagsFromContent` for automatic tagging of posts
+    - extended `tags.json` with richer categories and indexes (tech, gaming, lifestyle...)
+    - updated `Post` model to include `tags` field
+    - added @xenova/transformers dependency and used `Xenova/all-MiniLM-L6-v2` model
+
+[33mcommit cbba5a7fcb92294b8dab84d7cbc1b4e9a562ed44[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Mon Aug 25 08:32:40 2025 +0500
+
+    feat(User model): add default tags with randomized weights
+    
+    - import groups and indexes from tags.json
+    - generate a random tag from each group with normalized weights
+    - add `tags` field to User schema with default generated values
+
+[33mcommit b0f1d9b226d4fd94d42c9c1caf251824d7e70a70[m[33m ([m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Sun Aug 24 10:48:10 2025 +0500
+
+    feat(comment): unify reactions system for posts and comments
+    
+    - updated Reaction model to use `resourceID` instead of `postID`
+    - modified indexes to enforce uniqueness on `(authorID, resourceID)`
+    - made `makeReaction` controller to support both posts and comments
+    - added validation for resource type (`post` or `comment`)
+    - enhanced `getComments` to include reactions and user specific reaction info (just like in getPosts)
+    - updated `getPosts` to query reactions by `resourceID` instead of `postID`
+    - applied authorization middleware to make reaction route
+
+[33mcommit 5d20e7833e87c2d4e622c7c1a7811643986e299a[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Sun Aug 24 00:32:12 2025 +0500
+
+    refactor(comment): use route params instead of query params in getComments
+
+[33mcommit bcb50b6cee8e0ed5c8d50bbacdd64768e484037a[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Sat Aug 23 19:02:55 2025 +0500
+
+    docs: add status_codes.xlsx and reference in README
+
+[33mcommit 6951e4d2b484fa4d11265deb9e2ba1566389ba3a[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Thu Aug 21 15:59:07 2025 +0500
+
+    refactor(post): post reactions and track post edits
+    
+    - send only reaction types in getPosts instead of full reaction objects
+    - add isEdited flag to Post model
+    - set isEdited to true when a post is edited
+
+[33mcommit 72e310dcc75216507d2ffdb339c4ee706d60a4e7[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Thu Aug 21 13:00:27 2025 +0500
+
+    docs: add detailed API endpoint documentation to README
+
+[33mcommit a17dd93ad358e5169605502ba33f6d1fd4a9b2ed[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Mon Aug 18 17:06:05 2025 +0500
+
+    refactor(restrictUser): add duration and reason validation, remove role/power checks
+    
+    - Removed staff role/power comparison checks
+
+[33mcommit 592b6d8928942a72b2defefdeae6467d860159e9[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Sun Aug 17 16:42:13 2025 +0500
+
+    refactor(user): replace uploadPfp with editPfp & editSpecificPfp
+    
+    - extracted shared logic into `editPfpHelper` with promise based error handling
+    - Replaced route:
+      - `POST /uploadPfp` → `PATCH /editPfp`
+      - Added `PATCH /editSpecificPfp/:userID`
+
+[33mcommit bfe3b171a2732c2cc96df74e338f22a365e12fe9[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Sun Aug 17 15:41:00 2025 +0500
+
+    refactor(profile): Refactor user editing routes and controller
+    
+    - split `editUser` into `editUser` (self-edit) and `editSpecificUser` (admin edit)
+    - added `editUserHelper` to handle shared update logic
+    - updated routes:
+      - PATCH /editUser for own profile edits
+      - PATCH /editSpecificUser/:userID for editing other users (admin)
+
+[33mcommit 3c27931457df97c8cc3b0923a42489aafdb7199c[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Sat Aug 16 18:49:59 2025 +0500
+
+    feat(user): allow editing other users by ID and improve error handling
+    
+    - updated `editUser` to accept `userID` from route params
+    - updated `getAnyUserData` success code from '055' to '056' for consistency.
+
+[33mcommit 5778e8fea3502b5cec562c672e428d0e52cdfea3[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Fri Aug 15 19:40:53 2025 +0500
+
+    finally updated readme.md
+
+[33mcommit 74571d8123e1d2cdbb12d8d4b4b83f6882f80674[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Fri Aug 15 15:38:29 2025 +0500
+
+    feat(user): add getAnyUserData endpoint to fetch public profile by ID
+    
+    - added `getAnyUserData` method to retrieve any user's profile and post count by userID
+    - updated routes to include `/getAnyUserData/:userID`
+
+[33mcommit e27b7bcf8babebab0c2eb841395e22e6f8b81f1b[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Thu Aug 14 15:14:44 2025 +0500
+
+    fix(authorization): require explicit permission for `_any_` actions and enable edit_any_post route
+    
+    - updated `can()` to check if user has permission for `_any_` actions instead of automatically allowing based on power level
+    - added 'edit_any_post' to /editPost/:postID
+
+[33mcommit f3a508cf35c8fd7c0958cc36768b06ae29741270[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Thu Aug 14 12:50:38 2025 +0500
+
+    feat(user): Populate 'role' field in authorID for posts and comments
+    
+    - Updated commentController to include 'role' when populating authorID
+    - Updated postController to include 'role' when populating authorID
+
+[33mcommit 4bb35c711ca7ba152b0a3401e9814d9514dee8c0[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Thu Aug 14 12:21:05 2025 +0500
+
+    fix(authVerification): correctly handle '_own_' actions with populated or raw authorID
+
+[33mcommit 6ed43099a47579a153d17f6efe401d904f7ae569[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Thu Aug 14 11:53:22 2025 +0500
+
+    fix(authorization): handle deleted users in permission checks and fix comment delete route
+    
+    - added 'deleted' role to powerMap with lowest power
+    - updated `_any_` action checks to default missing or deleted authors to 'deleted'
+    - changed comment deletion route from GET to DELETE (which was accidentally done last time)
+
+[33mcommit 72d1ae6541dbc15927df2f341720aa963c91f4ce[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Thu Aug 14 11:19:49 2025 +0500
+
+    feat(authorization): added powerMap and  '_any_' permission checks; populate author roles in routes
+    
+    - added powerMap for hierarchical role comparison
+    - implemented _any_ permission handling in can()
+    - populating authorID.role in post, comment, and reaction routes
+    - include restrictionObject in sanitized user output
+
+[33mcommit b1c92f2863afbecd9956d6f1e57c396505eb5d0e[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Wed Aug 13 19:06:12 2025 +0500
+
+    feat(auth): add view/edit perms and secure routes
+    
+    - added EDIT_ANY_POST, VIEW_POSTS, EDIT_ANY_COMMENT, VIEW_COMMENTS perms
+    - updated role permissions accordingly
+    - applied new perms to post, comment, and user routes for granular access control
+    - fixed bug in extracting rolePerms for restricted role
+
+[33mcommit 4a4d708fa34bae94af7ccaa886c0819b4f1e2f96[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Wed Aug 13 18:42:33 2025 +0500
+
+    feat(auth/permissions): add role power map and granular classified permissions
+    
+    - added `powerMap` for role hierarchy to enforce rank based restriction checks
+    - updated `restrictUser` to prevent restricting users with same or higher rank
+    - refactored permission system:
+      - defined `perms` constants for all actions
+      - replaced old `permissions` object with `classified_permissions` for each role
+      - added restricted roles (restricted_l1, restricted_l2, restricted_l3) with specific allowed actions
+    - updated `can` middleware to respect new classified permissions and restriction levels
+
+[33mcommit cc0ef53ac216ef9389a1b9567d2a9d8b301eb16d[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Wed Aug 13 15:27:29 2025 +0500
+
+    feat(authorization): add level-based restriction system for users
+    
+    - added `restrictUser` controller to apply temporary level-based restrictions with reasons and durations
+    - introduced `restrictionObject` in User schema (level, expiresAt, reason)
+    - updated roles to include `restricted` and `moderator` and removed `jrmod`, `srmod`, `banned` and `owner`
+    - implemented `checkRestriction` middleware to handle expired restrictions
+    - added `/restrictUser/:userID` route with authorization for `restrict_user`
+    - adjusted permissions to reflect new roles and restriction handling
+
+[33mcommit 3b245179e9d8a3ef8aff549eefa20583b2a41fd3[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Tue Aug 12 18:39:07 2025 +0500
+
+    feat(user): send number of posts along with user data
+
+[33mcommit 5c83607120d6207cfbc78aa42bbb30604b84a0aa[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Mon Aug 11 12:42:44 2025 +0500
+
+    feat(post): add editPost endpoint
+    
+    - implemented editPost controller to update post text
+    - Added 'edit_own_post' permission to user and admin roles
+
+[33mcommit 0d73cbd845aca1b1b097b597e63b72fc5899ec54[m
+Author: beyondbytes96 <emmarthedev@gmail.com>
+Date:   Sun Aug 10 17:28:37 2025 +0500
+
+    feat(comments): add editComment endpoint
+    
+    - implemented editComment controller to update comment text by ID
+    - updated permissions to include 'edit_own_comment' for users and admins
+    - response returns the comment with updated fields
+
+[33mcommit bb601f1d369c5c3405672a185739e899185c92cc[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Wed Aug 6 20:00:28 2025 +0500
+
+    feat(posts): add pagination and user-specific post fetching
+    
+    - added pagination to getPosts with query params
+    - added getUserPosts controller with pagination support aswell
+    - removed error log in deletePost
+
+[33mcommit f2008bc41f65622c9b2baa8231d93bd735f3c99c[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Tue Aug 5 16:26:57 2025 +0500
+
+    feat(comments): Add pagination and sorting to getComments controller
+
+[33mcommit 13010109f8a56ecb21a41a5300d6c07b2a6b47b8[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Mon Aug 4 17:39:20 2025 +0500
+
+    fix(auth): error because of password field not being requested in passport initialization during local auth
+    
+    - password field not being present causes '009' error: "User didn't register with local auth; no password field present."
+    - fixed typo in authController: 'santitizeUser' instead of 'sanitizeUser'
+
+[33mcommit ef5178c33320c64f51ef9f27232b932c380acc26[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Sat Aug 2 19:29:15 2025 +0500
+
+    refactor(user): create new route 'user/getUserData' that sends user data instead of '/'
+
+[33mcommit 0624c02c31adfbf7967563a6bba8456e24bfc32b[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Wed Jul 30 19:04:35 2025 +0500
+
+    fix(post): change deletePost route method from GET to DELETE
+
+[33mcommit 2ebec77c6066756efbe550433ae1af68a21d2510[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Tue Jul 29 18:55:33 2025 +0500
+
+    feat(comment): send newly created comment back to frontend for UX
+
+[33mcommit a380d6f2bc6b18dc3f84782ca4f165e7029752b0[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Mon Jul 28 16:30:32 2025 +0500
+
+    feat(comment): add comment deletion feature
+
+[33mcommit 33475114bedd70cdc4cfdc71d33e5f0dcad4b722[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Mon Jul 28 15:20:20 2025 +0500
+
+    feat(reaction): add authorization for post deletion
+
+[33mcommit 9006d7c7fefc77e7cec0dd20e48f2922c501aa44[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Sun Jul 27 18:49:28 2025 +0500
+
+    feat(post): add post deletion route
+
+[33mcommit 6c69f2f0513b3b495cc3d5a7eff671e0567b7143[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Sun Jul 27 18:49:00 2025 +0500
+
+    feat(authorization): write authorization middleware
+
+[33mcommit 1505b88dae87f9e9d7dea4554de442c204cd5ea9[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Sun Jul 27 14:17:23 2025 +0500
+
+    feat: add timestamps in posts and comments
+
+[33mcommit d766b6122d7dcca64e6d87311519a0ed9ca2da99[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Sun Jul 27 13:46:11 2025 +0500
+
+    feat(comments): getPosts now returns num of comments as well
+
+[33mcommit e106d2a663b5b0357e017e98ee2114b21f152eed[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Sat Jul 26 18:04:30 2025 +0500
+
+    feat(comments): add a getComments route
+
+[33mcommit 468701755c931cd83c9918e4d6e620436a5f5799[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Sat Jul 26 16:28:25 2025 +0500
+
+    feat(comment): add comment creation route and modified comment model
+
+[33mcommit af54b2334daaf453a1906751cddf59ef7e3334c5[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Fri Jul 25 15:13:26 2025 +0500
+
+    feat(comment): add comment model and boilerplate
+
+[33mcommit 3b210d6c1ec536556f3d9c26b3b23fbfa3bab0dd[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Fri Jul 25 15:08:36 2025 +0500
+
+    fix(user): fix empty bio  not accepted by backend
+
+[33mcommit 8e7279776f2fbf0ca8d32f04ecd3e9a0158a9912[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Thu Jul 24 14:03:08 2025 +0500
+
+    feat(auth): add validation in login route
+
+[33mcommit fdda1dd7acd3c4328ef5f8eff0902ee47b21b82c[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Thu Jul 24 12:34:35 2025 +0500
+
+    feat(auth): add validation in registration route
+
+[33mcommit 5b1b5e944b21e21b00067af384c273362a484dd8[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Wed Jul 23 18:24:43 2025 +0500
+
+    fix(auth): fix registration not creating user session
+    
+    - fixed usernames colliding due to random name gen running at the start only once
+    - sanitized user objects before sending to frontend
+
+[33mcommit 8cbcabdabadff8d67a362195e61c1963ef5323aa[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Wed Jul 23 12:42:12 2025 +0500
+
+    fix(post): fix bug that crashed server when posts with no reaction from current user were found
+
+[33mcommit 2000c9d28da93d13f47229cb449dbc80f5924aa4[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Tue Jul 22 11:19:54 2025 +0500
+
+    feat(posts): modify getPosts route to include reactions as well
+    
+    - getPosts route includes a userReaction property with each post
+    - userReaction indicates that if the current user has previously made a reaction or not
+
+[33mcommit bd7159d041162ecf1431a07ef099f08420172878[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Sun Jul 20 23:27:04 2025 +0500
+
+    feat(reactions): add code to modify already existing reactions and limit one reaction per user per post
+    
+    - ensures a user can only create one reaction per post
+    - updates reaction if it already exists instead of creating duplicates
+
+[33mcommit 49eca92e84918618b4fa666578132b260765ac04[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Sun Jul 20 23:12:42 2025 +0500
+
+    feat(posts): add getPosts route and reference to author in post model
+
+[33mcommit 19ae9616f662a1a967086c2d1acf2a96baad2426[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Sun Jul 20 15:37:30 2025 +0500
+
+    feat(reactions): add reaction model and create/delete routes
+
+[33mcommit 2c340bbcad0bffd728dd95091cf1d785849fff7d[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Sun Jul 20 14:56:17 2025 +0500
+
+    feat(reactions): add reaction model and write boilerplate
+
+[33mcommit 496dc012490534ff87af0400dfc0cebb42e95242[m
+Author: beyondbytes13309 <emmarthedev@gmail.com>
+Date:   Sat Jul 19 00:21:28 2025 +0500
+
+    feat(posts): add secure post creation with validation and error handling

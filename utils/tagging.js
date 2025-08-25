@@ -26,16 +26,16 @@ function flattenEmbedding(embedding) {
 }
 
 const init = async () => {
+    embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
 
     if (fs.existsSync(TAG_EMBEDDINGS_FILE)) {
         console.log("Loading cached tag embeddings...");
         const saved = JSON.parse(fs.readFileSync(TAG_EMBEDDINGS_FILE, 'utf-8'));
         tagsVectorFlat = Object.values(saved);
-        return tagsVectorFlat;
+        return;
     }
 
     console.log("Computing tag embeddings...");
-    const embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
     const tags = Object.keys(indexes);
     const tagVectors = {};
 
@@ -47,8 +47,6 @@ const init = async () => {
     // Save embeddings for future use
     fs.writeFileSync(TAG_EMBEDDINGS_FILE, JSON.stringify(tagVectors));
     tagsVectorFlat = Object.values(tagVectors);
-
-    return tagsVectorFlat;
 };
 
 function cosineSimilarity(vecA, vecB) {

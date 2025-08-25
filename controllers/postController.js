@@ -1,15 +1,22 @@
 const mongoose = require('mongoose')
 const post = require('../routes/post')
+const { groups, indexes } = require('../configs/tags.json');
+const { generateWeightedTagsFromContent } = require('../utils/tagging')
 
 const createPost = async (Post, Reaction, req, res) => {
     const { postText } = req.body
     if (!postText) {
         return res.status(400).json({ code: '010', data: 'Invalid data'})
     }
-
+    /*
+    if (!Array.isArray(tags) && tags?.length>=3 && tags?.length <= 7) {
+      return res.status(400).json({ code: '010', data: 'Invalid Tags!'})
+    }
+      */
     const newPost = new Post({
         authorID: req.user._id,
-        postText: postText
+        postText: postText,
+        tags: await generateWeightedTagsFromContent(postText)
     })
 
     try {

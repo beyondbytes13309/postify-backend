@@ -155,23 +155,46 @@ const getUserPosts = async (Post, Reaction, Comment, req, res) => {
     }
 }
 
+const daysSince = iso => Math.floor((Date.now() - new Date(iso)) / 86400000);
+
+const calculateScore = (post, postTags, userTags, engagement, maxEngagement ) => {
+  const noisySim = 1 + (Math.random() - 0.5) * 0.06
+
+  let score = 
+    cosineSimilaritySparse(userTags, postTags) *
+    (1 + 0.1 * engagement/maxEngagement) *
+    (1/( 1 + 0.3 * daysSince(post.createdAt))) *
+    noisySim
+
+  return score
+
+}
+
 const getRecommendedPosts = async (Post, Reaction, Comment, req, res) => {
   const allPosts = await Post.find().select('+tags').lean()
   const user = req?.user
-  const limit = 3
+  const limit = 5
 
-  const scoredPosts = allPosts.map(post => ({
-      post,
-      score: cosineSimilaritySparse(user.tags, post.tags)
-  }));
+  const engagements = await Promise.all(allPosts.map(async (post) => {
+    const numberOfReactions = await Reaction.countDocuments({ resourceID: post._id })
+    const numberOfComments = await Comment.countDocuments({ resourceID: post._id })
+
+    const engagement = numberOfReactions + 2 * numberOfComments 
+    return { post, engagement }
+  }))
+
+  const maxEngagement = Math.max(1, ...engagements.map(e => e.engagement))
+
+  const scoredPosts = engagements.map(({ post, engagement }) => {
+    return { post, score: calculateScore(post, post.tags, user.tags, engagement, maxEngagement)}
+  })
 
   scoredPosts.sort((a, b) => b.score - a.score);
 
   const recommendedPosts = scoredPosts.slice(0, limit).map(p => {
-    const {tags, ...everythingElse} = p.post
-    return everythingElse
+    const {tags, updatedAt, ...everythingElse} = p.post
+    return { postText: everythingElse, score: p.score }
   })
-
   return res.status(200).json({ code: '013', data: recommendedPosts });
 
   // return res.status(200).json({ code: '013', data: 'This is just a test for now!' })

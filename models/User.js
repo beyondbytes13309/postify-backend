@@ -3,12 +3,20 @@ const bcrypt = require('bcrypt')
 
 const { groups, indexes } = require('../configs/tags.json');
 
-
-const getRandomElement = (array) => array[Math.floor(Math.random()*array.length)]
+const shuffleArray = (arr) => { // mutates original array
+    arr.forEach((element, index) => {
+        const randomNum = Math.floor(Math.random()*(1 + index))
+        arr[index] = arr[randomNum]
+        arr[randomNum] = element
+    })
+    return;
+}
 
 function genInitialTagsIndexed() {
-    const selected = Object.keys(groups).map(groupName => {
-        return indexes[getRandomElement(groups[groupName])]
+    const selected = Object.keys(groups).flatMap(groupName => {
+        const groupArray = groups[groupName]
+        shuffleArray(groupArray)
+        return groupArray.slice(0, 2).map(tagName => indexes[tagName])
     })
 
     let randomValues = selected.map(() => Math.random())

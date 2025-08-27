@@ -75,23 +75,32 @@ function cosineSimilarity(vecA, vecB) {
     return dot / (Math.sqrt(normA) * Math.sqrt(normB)); // (A . B) / (sqrt(normA) * sqrt(normB))
 }
 
-async function generateWeightedTagsFromContent(postText, minTags = 3, maxTags = 7) {
+async function generateWeightedTagsFromContent(postText, minTags = 3, maxTags = 10) {
+    const minScore = 0.1
+
     // 1: Convert post into vector
     const postEmbedding = await embedder(postText, { pooling: 'mean', normalize: true });
     const postVector = flattenEmbedding(postEmbedding);
 
     // 2: Compute similarity with each tag
-    const sims = tagsVectorFlat.map((tagVector, i) => ({
+    let sims = tagsVectorFlat.map((tagVector, i) => ({
         tag: Object.values(indexes)[i],
         score: cosineSimilarity(postVector, tagVector)
     }));
 
     // 3: Sort tags by similarity descending
     sims.sort((a, b) => b.score - a.score);
+    sims = sims.filter(t => t.score >= minScore)
 
     // 4: Pick top N tags randomly between minTags and maxTags
-    const numTags = Math.min(Math.max(minTags, Math.floor(Math.random() * (maxTags - minTags + 1) + minTags)), sims.length);
+    const numTags = Math.floor(Math.random() * (maxTags - minTags + 1)) + minTags
     const topTags = sims.slice(0, numTags);
+
+    if (topTags.length < minTags) {
+        const missingNumberOfTags = minTags - topTags.length
+        const remainingTags = sims.slice(topTags.length)
+        topTags = topTags.concat(remainingTags.slice(0, missingNumberOfTags))
+    }
 
     // 5: Normalize weights
     const sum = topTags.reduce((acc, current) => acc + current.score, 0);

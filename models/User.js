@@ -1,6 +1,32 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 
+const { groups, indexes } = require('../configs/tags.json');
+
+const shuffleArray = (arr) => { // mutates original array
+    arr.forEach((element, index) => {
+        const randomNum = Math.floor(Math.random()*(1 + index))
+        arr[index] = arr[randomNum]
+        arr[randomNum] = element
+    })
+    return;
+}
+
+function genInitialTagsIndexed() {
+    const selected = Object.keys(groups).flatMap(groupName => {
+        const groupArray = groups[groupName]
+        shuffleArray(groupArray)
+        return groupArray.slice(0, 2).map(tagName => indexes[tagName])
+    })
+
+    let randomValues = selected.map(() => Math.random())
+    const sum = randomValues.reduce((a, b) => a + b, 0)
+    randomValues = randomValues.map(value => parseFloat((value / sum).toFixed(4)))
+
+    return Object.fromEntries(selected.map((tagIndex, i) => [tagIndex, randomValues[i]]))
+}
+
+
 const defaultPfps = [
     'https://res.cloudinary.com/drwa5qpv4/image/upload/v1751643968/2_km1lrr.png',
     'https://res.cloudinary.com/drwa5qpv4/image/upload/v1751643935/1_ibjelc.png', 
@@ -63,7 +89,8 @@ const userSchema = new mongoose.Schema({
         level: { type: Number, enum: [0, 1, 2, 3], default: 0 }, 
         expiresAt: { type: Date, default: null }, 
         reason: { type: String, maxlength: 50, default: null }
-    }
+    },
+    tags: { type: Object, default: () => genInitialTagsIndexed() }
 }, {
     timestamps: true
 })

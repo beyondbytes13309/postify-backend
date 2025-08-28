@@ -1,15 +1,56 @@
 const mongoose = require('mongoose')
 const post = require('../routes/post')
+const { groups, indexes } = require('../configs/tags.json');
+const { generateWeightedTagsFromContent } = require('../utils/tagging')
+
+function cosineSimilaritySparse(userTags, postTags) {
+    if (!userTags || typeof userTags !== 'object') return 0;
+    if (!postTags || typeof postTags !== 'object') return 0;
+
+    let dot = 0, normA = 0, normB = 0;
+    const allKeys = new Set([...Object.keys(userTags), ...Object.keys(postTags)]);
+    
+    for (let key of allKeys) {
+        const a = userTags[key] || 0;
+        const b = postTags[key] || 0;
+        dot += a * b;
+        normA += a * a;
+        normB += b * b;
+    }
+
+    if (normA === 0 || normB === 0) return 0;
+    return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+}
+
+const daysSince = iso => Math.floor((Date.now() - new Date(iso)) / 86400000);
+
+const calculateScore = (post, postTags, userTags, engagement, maxEngagement ) => {
+  const noisySim = 1 + (Math.random() - 0.5) * 0.06
+
+  let score = 
+    cosineSimilaritySparse(userTags, postTags) *
+    (1 + 0.1 * engagement/maxEngagement) *
+    (1/( 1 + 0.3 * daysSince(post.createdAt))) *
+    noisySim
+
+  return score
+
+}
 
 const createPost = async (Post, Reaction, req, res) => {
     const { postText } = req.body
     if (!postText) {
         return res.status(400).json({ code: '010', data: 'Invalid data'})
     }
-
+    /*
+    if (!Array.isArray(tags) && tags?.length>=3 && tags?.length <= 7) {
+      return res.status(400).json({ code: '010', data: 'Invalid Tags!'})
+    }
+    */
     const newPost = new Post({
         authorID: req.user._id,
-        postText: postText
+        postText: postText,
+        tags: await generateWeightedTagsFromContent(postText)
     })
 
     try {
@@ -42,87 +83,138 @@ const createPost = async (Post, Reaction, req, res) => {
     }
 }
 
-const getPosts = async (Post, Reaction, Comment, req, res) => {
-    const maxNumOfPosts = 10
-    const page = parseInt(req?.query?.page) || 1
-    const skip = (page - 1) * maxNumOfPosts;
+const getPostsHelper = async (req, res, Post, Reaction, Comment, option='getPosts') => {
+  const maxNumOfPosts = 10
+  const page = parseInt(req?.query?.page) || 1
+  const skip = (page - 1) * maxNumOfPosts
+  const user = req?.user
 
-    try {
-        let query = Post.find()
+  try {
+    let query;
 
-        if (maxNumOfPosts > 0) {
-            query = query.skip(skip).limit(maxNumOfPosts);
-        }
+    if (option == 'getPosts' || option == 'getRecommendedPosts') {
+      query = Post.find()
+                  .populate('authorID', '_id displayName profilePicURL role')
+                  .lean()
+                  .select('+tags -updatedAt -__v')
 
-        const posts = await query
-            .sort({ createdAt: -1 })
-            .populate('authorID', '_id displayName profilePicURL role')
-        
+    } else if (option == 'getUserPosts') {
+      const userID = req?.params?.userID
+      if (!mongoose.Types.ObjectId.isValid(userID)) {
+          return { code: '010', data: 'Invalid userID!' }
+      }
+      query = Post.find({ authorID: userID })
+                  .populate('authorID', '_id displayName profilePicURL role')
+                  .lean()
+                  .select('-updatedAt -__v')
+    } 
 
-        const postsWithReactions = await Promise.all(
-          posts.map(async (post) => {
-            const reactions = await Reaction.find({ resourceID: post._id }).select('reactionType authorID _id')
-            const numOfComments = await Comment.countDocuments({ postID: post._id })
-            const userReactionObj = reactions.find(r => r.authorID == req.user?._id)
-            const userReaction = userReactionObj ? userReactionObj.reactionType : null
-            const reactionsToBeSent = reactions.map(r => r.reactionType)
-            return {
-              ...post.toObject(),
-              reactions: reactionsToBeSent,
-              userReaction,
-              userReactionID: userReactionObj?._id,
-              numOfComments
-            };
-          })
-        );
-        return res.status(200).json({ code: '014', data: postsWithReactions})
-    } catch(e) {
-        return res.status(500).json({code: '550', data: 'Unexpected error occured!'})
+    if (maxNumOfPosts > 0) {
+        query = query.skip(skip).limit(maxNumOfPosts);
     }
+
+    
+    let posts = await query
+
+    if (option == "getRecommendedPosts") {
+      const engagements = await Promise.all(
+        posts.map(async (post) => {
+          const numberOfReactions = await Reaction.countDocuments({
+            resourceID: post._id,
+          });
+          const numberOfComments = await Comment.countDocuments({
+            resourceID: post._id,
+          });
+
+          const engagement = numberOfReactions + 2 * numberOfComments;
+          return { post, engagement };
+        })
+      );
+
+      const maxEngagement = Math.max(
+        1,
+        ...engagements.map((e) => e.engagement)
+      );
+
+      const scoredPosts = engagements.map(({ post, engagement }) => {
+        return {
+          post: post,
+          score: calculateScore(
+            post,
+            post.tags,
+            user.tags,
+            engagement,
+            maxEngagement
+          ),
+        };
+      });
+
+      scoredPosts.sort((a, b) => b.score - a.score);
+
+      posts = scoredPosts.slice(0, 5).map(p => ({...p.post, score: p.score}))
+    }
+        
+    const postsWithReactions = await Promise.all(
+      posts.map(async (post) => {
+        const reactions = await Reaction.find({ resourceID: post._id }).select('reactionType authorID _id')
+        const numOfComments = await Comment.countDocuments({ postID: post._id })
+        const userReactionObj = reactions.find(r => r.authorID == req.user?._id)
+        const userReaction = userReactionObj ? userReactionObj.reactionType : null
+        const reactionsToBeSent = reactions.map(r => r.reactionType)
+        const { tags, ...everythingElse} = post
+        return {
+          ...everythingElse,
+          reactions: reactionsToBeSent,
+          userReaction,
+          userReactionID: userReactionObj?._id,
+          numOfComments
+        };
+      })
+    );
+
+    return { code: '013', data: postsWithReactions }
+  } catch(e) {
+    //return res.status(500).json({code: '550', data: 'Unexpected error occured!'})
+    return { code: '550', data: 'Unexpected error occured!' }
+  }
+
+}
+
+const getPosts = async (Post, Reaction, Comment, req, res) => {
+  const dataToSend = await getPostsHelper(req, res, Post, Reaction, Comment, 'getPosts')
+  if (dataToSend?.code == '013') {
+    return res.status(200).json(dataToSend)
+  } else if (dataToSend?.code == '550') {
+    return res.status(500).json(dataToSend)
+  } else if (dataToSend?.code == '010') {
+    return res.status(400).json(dataToSend)
+  }
     
 }
 
 const getUserPosts = async (Post, Reaction, Comment, req, res) => {
-    const userID = req?.params?.userID
-    const maxNumOfPosts = 10
-    const page = parseInt(req?.query?.page) || 1
-    const skip = (page - 1) * maxNumOfPosts;
+  const dataToSend = await getPostsHelper(req, res, Post, Reaction, Comment, 'getUserPosts')
+  if (dataToSend?.code == '013') {
+    return res.status(200).json(dataToSend)
+  } else if (dataToSend?.code == '550') {
+    return res.status(500).json(dataToSend)
+  } else if (dataToSend?.code == '010') {
+    return res.status(400).json(dataToSend)
+  }
+}
 
-    if (!mongoose.Types.ObjectId.isValid(userID)) {
-        return res.status(400).json({ code: '010', data: 'Invalid userID!' })
-    }
 
-    try {
-        let query = Post.find({ authorID: userID })
 
-        if (maxNumOfPosts > 0) {
-            query = query.skip(skip).limit(maxNumOfPosts);
-        }
+const getRecommendedPosts = async (Post, Reaction, Comment, req, res) => {
+  const dataToSend = await getPostsHelper(req, res, Post, Reaction, Comment, 'getRecommendedPosts')
+  if (dataToSend?.code == '013') {
+    return res.status(200).json(dataToSend)
+  } else if (dataToSend?.code == '550') {
+    return res.status(500).json(dataToSend)
+  } else if (dataToSend?.code == '010') {
+    return res.status(400).json(dataToSend)
+  }
 
-        const posts = await query
-            .sort({ createdAt: -1 })
-            .populate('authorID', '_id displayName profilePicURL role')
-
-        const postsWithReactions = await Promise.all(
-            posts.map(async (post) => {
-            const reactions = await Reaction.find({ postID: post._id }).select('reactionType authorID _id')
-            const numOfComments = await Comment.countDocuments({ postID: post._id })
-            const userReactionObj = reactions.find(r => r.authorID == req.user?._id)
-            const userReaction = userReactionObj ? userReactionObj.reactionType : null
-            const reactionsToBeSent = reactions.map(r => r.reactionType)
-            return {
-                ...post.toObject(),
-                reactions: reactionsToBeSent,
-                userReaction,
-                userReactionID: userReactionObj?._id,
-                numOfComments
-            };
-            })
-        );
-        return res.status(200).json({ code: '013', data: postsWithReactions})
-    } catch(e) {
-        return res.status(500).json({code: '550', data: 'Unexpected error occured!'})
-    }
 }
 
 const deletePost = async (Post, Reaction, Comment, req, res) => {
@@ -210,4 +302,4 @@ const editPost = async (Post, req, res) => {
   }
 };
 
-module.exports = { createPost, getPosts, getUserPosts, deletePost, editPost }
+module.exports = { createPost, getPosts, getRecommendedPosts, getUserPosts, deletePost, editPost }

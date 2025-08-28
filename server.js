@@ -24,6 +24,7 @@ const { checkAuth, authorize, checkRestriction } = require('./middleware/authVer
 
 const initialize = require('./utils/passportConfig.js')
 const { setupCloudinary } = require('./utils/cloudinaryConfig.js')
+const { init } = require('./utils/tagging.js')
 
 
 
@@ -59,6 +60,7 @@ const { uploads, cloudinary } = setupCloudinary()
 const mainFunction = async () => {
 
     await connectToDB(process.env.MONGODB_CONNECTION_STRING)
+    await init()
     app.use('/auth', auth(User))
     app.use('/user', checkAuth, user(User, Post, uploads, cloudinary))
     app.use('/post', checkAuth, post(Post, Reaction, Comment))

@@ -268,4 +268,32 @@ const restrictUser = async (User, req, res) => {
   }
 }
 
-module.exports = { editPfp, editSpecificPfp, editUser, editSpecificUser, getUserData, getAnyUserData, restrictUser };
+const unRestrictUser = async (User, req, res) => {
+  const userID = req?.params?.userID
+
+  if (!mongoose.Types.ObjectId.isValid(userID)) {
+    return res.status(400).json({ code: '010', data: 'Invalid userID!' })
+  }
+
+  try {
+    const user = await User.findById(userID)
+    if (!user) {
+      return res.status(404).json({ code: '001', data: 'User not found'})
+    }
+
+    const prevRestrictionLevel = user.restrictionObject.level
+
+    user.role = 'user'
+    user.restrictionObject.level = null;
+    user.restrictionObject.expiresAt = null;
+    user.restrictionObject.reason = null;
+
+    await user.save()
+
+    return res.status(200).json({ code: '042', data: `${user.username} just got independence from a level ${prevRestrictionLevel} restriction!` })
+  } catch(e) {
+    return res.status(500).json({ code: '550', data: "Unexpected error occured!" })
+  }
+}
+
+module.exports = { editPfp, editSpecificPfp, editUser, editSpecificUser, getUserData, getAnyUserData, restrictUser, unRestrictUser };

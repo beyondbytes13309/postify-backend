@@ -36,7 +36,11 @@ const perms = {
 
     RESTRICT_LEVEL_1: 'restrict_user_level_1',
     RESTRICT_LEVEL_2: 'restrict_user_level_2',
-    RESTRICT_LEVEL_3: 'restrict_user_level_3'
+    RESTRICT_LEVEL_3: 'restrict_user_level_3',
+
+    UNRESTRICT_LEVEL_1: 'unrestrict_user_level_1',
+    UNRESTRICT_LEVEL_2: 'unrestrict_user_level_2',
+    UNRESTRICT_LEVEL_3: 'unrestrict_user_level_3',
 }
 
 const classified_permissions = {
@@ -75,7 +79,10 @@ const classified_permissions = {
         perms.VIEW_COMMENTS,
         
         perms.RESTRICT_LEVEL_1,
-        perms.RESTRICT_LEVEL_2
+        perms.RESTRICT_LEVEL_2,
+
+        perms.UNRESTRICT_LEVEL_1,
+        perms.UNRESTRICT_LEVEL_2
     ],
     admin: Object.values(perms),
     restricted_l1: [

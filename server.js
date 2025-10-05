@@ -18,6 +18,7 @@ const user = require('./routes/user.js')
 const post = require('./routes/post.js')
 const reaction = require('./routes/reaction.js')
 const comment = require('./routes/comment.js')
+const admin = require('./routes/admin.js')
 
 
 const { checkAuth, authorize, checkRestriction } = require('./middleware/authVerification.js')
@@ -66,6 +67,7 @@ const mainFunction = async () => {
     app.use('/post', checkAuth, post(Post, Reaction, Comment))
     app.use('/reaction', checkAuth, reaction(Reaction, Post, Comment))
     app.use('/comment', checkAuth, comment(Comment, Reaction))
+    app.use('/admin', checkAuth, admin(User))
 
 }
 

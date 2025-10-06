@@ -9,17 +9,6 @@ const getPublicIdFromUrl = (url) => {
   return publicIdWithExt.replace(/\.[^/.]+$/, ''); // remove extension
 };
 
-const levelMap = {
-  'level-1': 1,
-  'level-2': 2,
-  'level-3': 3
-};
-
-const powerMap = {
-  'moderator': 1,
-  'admin': 2
-}
-
 const editPfpHelper = (uploads, cloudinary, req, res, user) => {
   return new Promise((resolve, reject) => {
     uploads.single("image")(req, res, async function (err) {

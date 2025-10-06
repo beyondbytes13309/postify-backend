@@ -41,6 +41,8 @@ const perms = {
     UNRESTRICT_LEVEL_1: 'unrestrict_user_level_1',
     UNRESTRICT_LEVEL_2: 'unrestrict_user_level_2',
     UNRESTRICT_LEVEL_3: 'unrestrict_user_level_3',
+
+    GIVE_AUTHORITY_MODERATOR: 'give_authority_moderator'
 }
 
 const classified_permissions = {
